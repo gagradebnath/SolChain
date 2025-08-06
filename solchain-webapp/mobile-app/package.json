@@ -1,0 +1,27 @@
+{
+  "name": "solchain-mobile-app",
+  "version": "1.0.0",
+  "description": "A mobile application for the SolChain project, enabling users to manage their energy trading and wallet.",
+  "main": "src/App.js",
+  "scripts": {
+    "start": "react-native start",
+    "android": "react-native run-android",
+    "ios": "react-native run-ios",
+    "test": "jest",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "react": "17.0.2",
+    "react-native": "0.64.2",
+    "axios": "^0.21.1",
+    "web3": "^1.5.0"
+  },
+  "devDependencies": {
+    "eslint": "^7.32.0",
+    "jest": "^27.0.6"
+  },
+  "jest": {
+    "preset": "react-native"
+  },
+  "license": "MIT"
+}
