@@ -1,0 +1,28 @@
+{
+  "name": "solchain-iot-simulator",
+  "version": "1.0.0",
+  "description": "IoT Device Simulator for SolChain",
+  "main": "src/simulator.js",
+  "scripts": {
+    "start": "node src/simulator.js",
+    "dev": "nodemon src/simulator.js",
+    "test": "jest",
+    "smart-meter": "node src/smart-meters/smartMeterSimulator.js",
+    "solar-panel": "node src/solar-panels/solarPanelSimulator.js",
+    "battery": "node src/battery/batterySimulator.js",
+    "weather": "node src/weather/weatherSimulator.js"
+  },
+  "dependencies": {
+    "mqtt": "^5.3.0",
+    "ws": "^8.14.2",
+    "node-cron": "^3.0.3",
+    "axios": "^1.6.0",
+    "crypto": "^1.0.1",
+    "uuid": "^9.0.1",
+    "faker": "^6.6.6"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2",
+    "jest": "^29.7.0"
+  }
+}

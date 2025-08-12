@@ -1,0 +1,118 @@
+version: '3.8'
+
+services:
+  # Backend API Server
+  backend:
+    build: ./backend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - DB_HOST=database
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    depends_on:
+      - database
+      - redis
+    command: npm run dev
+
+  # Frontend Application
+  frontend:
+    build: ./frontend
+    ports:
+      - "3001:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - REACT_APP_API_URL=http://localhost:3000
+    command: npm start
+
+  # Database (SQLite in development, PostgreSQL for production)
+  database:
+    image: postgres:14-alpine
+    environment:
+      - POSTGRES_DB=solchain
+      - POSTGRES_USER=solchain
+      - POSTGRES_PASSWORD=password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+
+  # Redis for caching and session management
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  # Blockchain Local Network (Hardhat)
+  blockchain:
+    build: ./blockchain
+    ports:
+      - "8545:8545"
+    command: npx hardhat node --hostname 0.0.0.0
+    volumes:
+      - ./blockchain:/app
+
+  # IoT Simulator
+  iot-simulator:
+    build: ./iot-simulator
+    environment:
+      - MQTT_BROKER=mqtt://mqtt-broker:1883
+      - API_URL=http://backend:3000
+    depends_on:
+      - backend
+      - mqtt-broker
+    volumes:
+      - ./iot-simulator:/app
+    command: npm run start
+
+  # MQTT Broker for IoT Communication
+  mqtt-broker:
+    image: eclipse-mosquitto:2
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - ./config/mosquitto.conf:/mosquitto/config/mosquitto.conf
+
+  # AI/ML Service
+  ai-ml:
+    build: ./ai-ml
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./ai-ml:/app
+    environment:
+      - FLASK_ENV=development
+      - DATABASE_URL=postgresql://solchain:password@database:5432/solchain
+    depends_on:
+      - database
+    command: python app.py
+
+  # Monitoring and Logging
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3002:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+
+volumes:
+  postgres_data:
+  redis_data:
+  grafana_data:

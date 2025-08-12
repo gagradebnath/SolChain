@@ -1,0 +1,48 @@
+{
+  "name": "solchain-prototype",
+  "version": "1.0.0",
+  "description": "SolChain - Blockchain Based P2P Solar Energy Sharing Microgrid System",
+  "main": "backend/src/app.js",
+  "scripts": {
+    "dev": "concurrently \"npm run backend:dev\" \"npm run frontend:dev\"",
+    "backend:dev": "cd backend && npm run dev",
+    "frontend:dev": "cd frontend && npm start",
+    "blockchain:compile": "cd blockchain && npx hardhat compile",
+    "blockchain:deploy": "cd blockchain && npx hardhat run scripts/deploy.js",
+    "db:setup": "cd backend && npm run db:migrate && npm run db:seed",
+    "test": "npm run test:backend && npm run test:frontend && npm run test:blockchain",
+    "test:backend": "cd backend && npm test",
+    "test:frontend": "cd frontend && npm test",
+    "test:blockchain": "cd blockchain && npx hardhat test",
+    "iot:simulate": "cd iot-simulator && node src/simulator.js",
+    "ai:train": "cd ai-ml && python train_models.py",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "format": "prettier --write .",
+    "build": "npm run build:frontend && npm run build:backend",
+    "build:frontend": "cd frontend && npm run build",
+    "build:backend": "cd backend && npm run build"
+  },
+  "keywords": [
+    "blockchain",
+    "solar",
+    "energy",
+    "p2p",
+    "microgrid",
+    "iot",
+    "ai",
+    "web3"
+  ],
+  "author": "Team GreyDevs",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "eslint": "^8.57.0",
+    "prettier": "^3.0.3"
+  },
+  "workspaces": [
+    "frontend",
+    "backend",
+    "blockchain",
+    "iot-simulator"
+  ]
+}
