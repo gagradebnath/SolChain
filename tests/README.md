@@ -1,13 +1,17 @@
-# SolChain Testing Strategy
+# Tests - SolChain Testing Suite
 
 ## Overview
-Comprehensive testing strategy for SolChain prototype covering all system components.
+This directory contains comprehensive test suites for all components of the SolChain platform, including unit tests, integration tests, end-to-end tests, performance tests, and security tests.
 
-## Testing Structure
+## Testing Strategy
+The SolChain testing strategy follows a multi-layered approach ensuring reliability, security, and performance across all system components:
 
-### 1. Unit Tests (`tests/unit/`)
-- **Frontend**: Component testing, service testing
-- **Backend**: Controller testing, model testing, service testing
+1. **Unit Tests**: Individual component testing
+2. **Integration Tests**: Component interaction testing
+3. **End-to-End Tests**: Complete user workflow testing
+4. **Performance Tests**: Load and stress testing
+5. **Security Tests**: Vulnerability and penetration testing
+6. **Smart Contract Tests**: Blockchain functionality testing
 - **Smart Contracts**: Contract function testing, edge cases
 - **IoT Simulator**: Device simulation testing
 - **AI/ML**: Model accuracy testing, prediction validation
