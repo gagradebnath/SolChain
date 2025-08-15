@@ -1,4 +1,5 @@
 require("@nomicfoundation/hardhat-toolbox");
+require("@nomicfoundation/hardhat-chai-matchers");
 require("hardhat-gas-reporter");
 require("hardhat-contract-sizer");
 require("dotenv").config();
