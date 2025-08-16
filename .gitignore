@@ -59,3 +59,4 @@ temp/
 
 # Documentation build
 docs/_build/
+.github/instructions/blockchain.instructions.md
