@@ -1,8 +1,8 @@
 /**
  * Wallet Components
- * 
+ *
  * SolarToken wallet management and transactions
- * 
+ *
  * Functions to implement:
  * - WalletOverview(): Main wallet dashboard
  * - BalanceDisplay(): SolarToken balance
@@ -18,7 +18,7 @@
  * - PaymentGateway(): Fiat payment integration (bKash)
  * - WalletExport(): Export wallet data
  * - RecoveryPhrase(): Backup phrase management
- * 
+ *
  * @author Team GreyDevs
  */
 
