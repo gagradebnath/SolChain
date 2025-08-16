@@ -1,8 +1,8 @@
 /**
  * Energy Dashboard Components
- * 
+ *
  * Real-time energy monitoring, production/consumption visualization
- * 
+ *
  * Functions to implement:
  * - EnergyOverview(): Main energy dashboard
  * - ProductionChart(): Solar production visualization
@@ -16,7 +16,7 @@
  * - ExportSummary(): Energy export summary
  * - CarbonFootprint(): Environmental impact tracking
  * - PredictiveAnalytics(): AI-powered energy predictions
- * 
+ *
  * @author Team GreyDevs
  */
 
