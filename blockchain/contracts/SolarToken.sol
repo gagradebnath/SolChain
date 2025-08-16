@@ -1,35 +1,275 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.25;
+
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Pausable.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+
 /**
- * SolarToken (ST) - ERC20 Token Contract
+ * @title SolarToken (ST)
+ * @dev ERC20 Token representing energy units in the SolChain ecosystem
+ * 1 ST = 1 kWh of energy
  * 
- * Native token for SolChain representing energy units (1 ST = 1 kWh)
- * 
- * Functions to implement:
- * - constructor(): Initialize token with name, symbol, initial supply
- * - mint(): Mint new tokens (only authorized minters)
- * - burn(): Burn tokens from circulation
- * - transfer(): Transfer tokens between accounts
- * - approve(): Approve spending allowance
- * - transferFrom(): Transfer tokens on behalf of owner
- * - addMinter(): Add authorized minter (only owner)
- * - removeMinter(): Remove minter authorization
- * - pause(): Pause token transfers (emergency)
- * - unpause(): Resume token transfers
- * - blacklist(): Blacklist malicious addresses
- * - removeFromBlacklist(): Remove from blacklist
- * - setTransferFee(): Set transfer fee percentage
- * - updateMetadata(): Update token metadata
- * - snapshot(): Create token balance snapshot
- * - emergencyWithdraw(): Emergency token withdrawal
- * 
- * Events to implement:
- * - TokensMinted(address indexed to, uint256 amount)
- * - TokensBurned(address indexed from, uint256 amount)
- * - MinterAdded(address indexed minter)
- * - MinterRemoved(address indexed minter)
- * - AddressBlacklisted(address indexed account)
- * - AddressWhitelisted(address indexed account)
+ * Features:
+ * - Mintable by authorized minters (energy producers)
+ * - Burnable for energy consumption
+ * - Pausable for emergency situations
+ * - Role-based access control
+ * - Transfer fees for platform sustainability
+ * - Blacklist functionality for security
+ * - Permit functionality for gasless transactions
  * 
  * @author Team GreyDevs
  */
+contract SolarToken is 
+    ERC20, 
+    ERC20Permit, 
+    ERC20Pausable, 
+    ERC20Burnable, 
+    AccessControl, 
+    ReentrancyGuard 
+{
+    // Roles
+    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+    bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
+    bytes32 public constant BLACKLIST_ROLE = keccak256("BLACKLIST_ROLE");
+    bytes32 public constant FEE_MANAGER_ROLE = keccak256("FEE_MANAGER_ROLE");
 
-// TODO: Implement SolarToken ERC20 contract
+    // State variables
+    uint256 public transferFeePercentage; // Fee in basis points (100 = 1%)
+    address public feeCollector;
+    mapping(address => bool) public blacklisted;
+    mapping(address => bool) public whitelisted; // Exempt from fees
+    
+    // Maximum supply cap (100 million tokens)
+    uint256 public constant MAX_SUPPLY = 100_000_000 * 10**18;
+    
+    // Events
+    event TokensMinted(address indexed to, uint256 amount, string reason);
+    event TokensBurned(address indexed from, uint256 amount, string reason);
+    event MinterAdded(address indexed minter, address indexed admin);
+    event MinterRemoved(address indexed minter, address indexed admin);
+    event AddressBlacklisted(address indexed account, address indexed admin);
+    event AddressWhitelisted(address indexed account, address indexed admin);
+    event TransferFeeUpdated(uint256 oldFee, uint256 newFee, address indexed admin);
+    event FeeCollectorUpdated(address indexed oldCollector, address indexed newCollector);
+    event FeesCollected(address indexed from, address indexed to, uint256 amount);
+
+    // Errors
+    error AddressIsBlacklisted(address account);
+    error InsufficientBalance(uint256 required, uint256 available);
+    error ExceedsMaxSupply(uint256 requested, uint256 maxSupply);
+    error InvalidFeePercentage(uint256 fee);
+    error ZeroAddress();
+    error InvalidAmount(uint256 amount);
+
+    /**
+     * @dev Constructor
+     * @param _initialSupply Initial token supply
+     * @param _feeCollector Address to collect transfer fees
+     */
+    constructor(
+        uint256 _initialSupply,
+        address _feeCollector
+    ) 
+        ERC20("SolarToken", "ST") 
+        ERC20Permit("SolarToken")
+    {
+        if (_feeCollector == address(0)) revert ZeroAddress();
+        if (_initialSupply > MAX_SUPPLY) revert ExceedsMaxSupply(_initialSupply, MAX_SUPPLY);
+
+        // Setup roles
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _grantRole(MINTER_ROLE, msg.sender);
+        _grantRole(PAUSER_ROLE, msg.sender);
+        _grantRole(BLACKLIST_ROLE, msg.sender);
+        _grantRole(FEE_MANAGER_ROLE, msg.sender);
+
+        // Initialize state
+        feeCollector = _feeCollector;
+        transferFeePercentage = 25; // 0.25% default fee
+        whitelisted[msg.sender] = true;
+        whitelisted[_feeCollector] = true;
+
+        // Mint initial supply
+        if (_initialSupply > 0) {
+            _mint(msg.sender, _initialSupply);
+            emit TokensMinted(msg.sender, _initialSupply, "Initial supply");
+        }
+    }
+
+    /**
+     * @dev Mint tokens to an account
+     * @param to Recipient address
+     * @param amount Amount to mint
+     * @param reason Reason for minting
+     */
+    function mint(
+        address to, 
+        uint256 amount, 
+        string calldata reason
+    ) external onlyRole(MINTER_ROLE) nonReentrant {
+        if (to == address(0)) revert ZeroAddress();
+        if (amount == 0) revert InvalidAmount(amount);
+        if (blacklisted[to]) revert AddressIsBlacklisted(to);
+        if (totalSupply() + amount > MAX_SUPPLY) revert ExceedsMaxSupply(amount, MAX_SUPPLY);
+
+        _mint(to, amount);
+        emit TokensMinted(to, amount, reason);
+    }
+
+    /**
+     * @dev Burn tokens with reason
+     * @param amount Amount to burn
+     * @param reason Reason for burning
+     */
+    function burnWithReason(uint256 amount, string calldata reason) external {
+        if (amount == 0) revert InvalidAmount(amount);
+        if (balanceOf(msg.sender) < amount) revert InsufficientBalance(amount, balanceOf(msg.sender));
+
+        _burn(msg.sender, amount);
+        emit TokensBurned(msg.sender, amount, reason);
+    }
+
+    /**
+     * @dev Pause token transfers
+     */
+    function pause() external onlyRole(PAUSER_ROLE) {
+        _pause();
+    }
+
+    /**
+     * @dev Unpause token transfers
+     */
+    function unpause() external onlyRole(PAUSER_ROLE) {
+        _unpause();
+    }
+
+    /**
+     * @dev Add address to blacklist
+     * @param account Address to blacklist
+     */
+    function blacklistAddress(address account) external onlyRole(BLACKLIST_ROLE) {
+        if (account == address(0)) revert ZeroAddress();
+        blacklisted[account] = true;
+        emit AddressBlacklisted(account, msg.sender);
+    }
+
+    /**
+     * @dev Remove address from blacklist
+     * @param account Address to whitelist
+     */
+    function removeFromBlacklist(address account) external onlyRole(BLACKLIST_ROLE) {
+        if (account == address(0)) revert ZeroAddress();
+        blacklisted[account] = false;
+        emit AddressWhitelisted(account, msg.sender);
+    }
+
+    /**
+     * @dev Set transfer fee percentage
+     * @param _feePercentage Fee in basis points (100 = 1%)
+     */
+    function setTransferFee(uint256 _feePercentage) external onlyRole(FEE_MANAGER_ROLE) {
+        if (_feePercentage > 1000) revert InvalidFeePercentage(_feePercentage); // Max 10%
+        
+        uint256 oldFee = transferFeePercentage;
+        transferFeePercentage = _feePercentage;
+        emit TransferFeeUpdated(oldFee, _feePercentage, msg.sender);
+    }
+
+    /**
+     * @dev Set fee collector address
+     * @param _feeCollector New fee collector address
+     */
+    function setFeeCollector(address _feeCollector) external onlyRole(FEE_MANAGER_ROLE) {
+        if (_feeCollector == address(0)) revert ZeroAddress();
+        
+        address oldCollector = feeCollector;
+        feeCollector = _feeCollector;
+        emit FeeCollectorUpdated(oldCollector, _feeCollector);
+    }
+
+    /**
+     * @dev Add address to whitelist (exempt from fees)
+     * @param account Address to whitelist
+     */
+    function addToWhitelist(address account) external onlyRole(FEE_MANAGER_ROLE) {
+        if (account == address(0)) revert ZeroAddress();
+        whitelisted[account] = true;
+    }
+
+    /**
+     * @dev Remove address from whitelist
+     * @param account Address to remove from whitelist
+     */
+    function removeFromWhitelist(address account) external onlyRole(FEE_MANAGER_ROLE) {
+        whitelisted[account] = false;
+    }
+
+    /**
+     * @dev Override transfer to include fees and blacklist checks
+     */
+    function _update(
+        address from,
+        address to,
+        uint256 value
+    ) internal override(ERC20, ERC20Pausable) {
+        // Check blacklist
+        if (blacklisted[from] || blacklisted[to]) {
+            revert AddressIsBlacklisted(blacklisted[from] ? from : to);
+        }
+
+        // Handle fees for non-whitelisted transfers
+        if (from != address(0) && to != address(0) && !whitelisted[from] && !whitelisted[to]) {
+            uint256 fee = (value * transferFeePercentage) / 10000;
+            if (fee > 0) {
+                super._update(from, feeCollector, fee);
+                emit FeesCollected(from, feeCollector, fee);
+                value -= fee;
+            }
+        }
+
+        super._update(from, to, value);
+    }
+
+    /**
+     * @dev Get circulating supply (total supply minus burned tokens)
+     */
+    function circulatingSupply() external view returns (uint256) {
+        return totalSupply();
+    }
+
+    /**
+     * @dev Check if address is minter
+     */
+    function isMinter(address account) external view returns (bool) {
+        return hasRole(MINTER_ROLE, account);
+    }
+
+    /**
+     * @dev Emergency withdraw function (only admin)
+     */
+    function emergencyWithdraw(address token, address to, uint256 amount) 
+        external 
+        onlyRole(DEFAULT_ADMIN_ROLE) 
+        nonReentrant 
+    {
+        if (to == address(0)) revert ZeroAddress();
+        
+        if (token == address(0)) {
+            // Withdraw ETH
+            payable(to).transfer(amount);
+        } else {
+            // Withdraw ERC20 tokens
+            IERC20(token).transfer(to, amount);
+        }
+    }
+
+    /**
+     * @dev Allow contract to receive ETH
+     */
+    receive() external payable {}
+}
