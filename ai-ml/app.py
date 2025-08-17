@@ -1,5 +1,5 @@
 """
-SolChain AI/ML Service - Simple Working Version
+SolChain AI/ML Service
 
 A simplified FastAPI app with working AI/ML models for:
 - Demand forecasting
@@ -17,7 +17,24 @@ import os
 import sys
 import logging
 import json
+import math
 from pathlib import Path
+
+def clean_for_json(obj):
+    """Clean object for JSON serialization by replacing NaN and inf values"""
+    if isinstance(obj, dict):
+        return {k: clean_for_json(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [clean_for_json(v) for v in obj]
+    elif isinstance(obj, float):
+        if math.isnan(obj):
+            return 0.0
+        elif math.isinf(obj):
+            return 1000.0 if obj > 0 else -1000.0
+        else:
+            return obj
+    else:
+        return obj
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -301,7 +318,8 @@ async def train_all_models():
         success = forecaster.fit(df) if forecaster else False
         results["forecasting"] = {"success": success}
         if success:
-            results["forecasting"]["metrics"] = forecaster.get_metrics(df.tail(1000))
+            metrics = forecaster.get_metrics(df.tail(1000))
+            results["forecasting"]["metrics"] = clean_for_json(metrics)
     except Exception as e:
         results["forecasting"] = {"success": False, "error": str(e)}
     
@@ -311,7 +329,8 @@ async def train_all_models():
         success = pricer.fit(df) if pricer else False
         results["pricing"] = {"success": success}
         if success:
-            results["pricing"]["metrics"] = pricer.get_metrics(df.tail(1000))
+            metrics = pricer.get_metrics(df.tail(1000))
+            results["pricing"]["metrics"] = clean_for_json(metrics)
     except Exception as e:
         results["pricing"] = {"success": False, "error": str(e)}
     
@@ -321,7 +340,8 @@ async def train_all_models():
         success = anomaly_detector.fit(df) if anomaly_detector else False
         results["anomaly"] = {"success": success}
         if success:
-            results["anomaly"]["metrics"] = anomaly_detector.get_metrics(df.tail(1000))
+            metrics = anomaly_detector.get_metrics(df.tail(1000))
+            results["anomaly"]["metrics"] = clean_for_json(metrics)
     except Exception as e:
         results["anomaly"] = {"success": False, "error": str(e)}
     
@@ -331,17 +351,18 @@ async def train_all_models():
         success = optimizer.fit(df) if optimizer else False
         results["optimization"] = {"success": success}
         if success:
-            results["optimization"]["metrics"] = optimizer.get_metrics(df.tail(1000))
+            metrics = optimizer.get_metrics(df.tail(1000))
+            results["optimization"]["metrics"] = clean_for_json(metrics)
     except Exception as e:
         results["optimization"] = {"success": False, "error": str(e)}
     
     overall_success = all(result.get("success", False) for result in results.values())
     
-    return {
+    return clean_for_json({
         "success": overall_success,
         "message": "All models trained" if overall_success else "Some models failed to train",
         "results": results
-    }
+    })
 
 @app.post("/predict/forecast", response_model=PredictionResponse)
 async def predict_demand(energy_data: List[EnergyData]):

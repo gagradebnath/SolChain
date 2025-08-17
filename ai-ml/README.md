@@ -29,6 +29,34 @@ SolChain ML system is **fully functional** with 4 working models and a complete 
 - **Multiple device types**: Residential, commercial, industrial
 - **Weather integration**: Temperature, humidity, solar, wind
 
+#### Dataset Columns and Units
+
+| Field | Type | Description | Unit |
+|-------|------|-------------|------|
+| `timestamp` | DateTime | When the data was recorded | ISO 8601 |
+| `deviceId` | String | Unique device identifier | N/A |
+| `deviceType` | String | Type of device | N/A |
+| `location` | JSON String | Geographic location data | JSON |
+| `consumption` | Float | Energy consumed | kWh |
+| `production` | Float | Energy produced | kWh |
+| `netEnergy` | Float | Production - Consumption | kWh |
+| `temperature` | Float | Temperature | °C |
+| `humidity` | Float | Humidity | 0-1 |
+| `cloudCover` | Float | Cloud coverage | 0-1 |
+| `windSpeed` | Float | Wind speed | m/s |
+| `solarIrradiance` | Float | Solar irradiance | W/m² |
+| `precipitation` | Float | Precipitation | mm |
+| `hour` | Integer | Hour of day | 0-23 |
+| `dayOfWeek` | Integer | Day of week | 0-6 |
+| `dayOfYear` | Integer | Day of year | 1-365 |
+| `month` | Integer | Month | 1-12 |
+| `isWeekend` | Boolean | Is weekend day | Boolean |
+| `solarCapacity` | Float | Solar panel capacity | kW |
+| `efficiency` | Float | System efficiency | 0-1 |
+| `hasSmartMeter` | Boolean | Has smart meter | Boolean |
+| `hasSolar` | Boolean | Has solar panels | Boolean |
+| `anomaly` | String | Anomaly label (for training) | N/A |
+
 ---
 
 ## Technical Overview of Models
@@ -172,7 +200,11 @@ SolChain ML system is **fully functional** with 4 working models and a complete 
 |----------|--------|---------|---------------|
 | `/health` | GET | Health check | ~2ms |
 | `/datasets/info` | GET | Dataset information | ~10ms |
-| `/train/all` | POST | Train all models | ~30 minutes |
+| `/train/all` | POST | Train all models | ~20 minutes |
+| `/train/forecast` | POST | Train demand forecasting model | ~5 minutes |
+| `/train/pricing` | POST | Train dynamic pricing model | ~5 minutes |
+| `/train/anomaly` | POST | Train anomaly detection model | ~5 minutes |
+| `/train/optimization` | POST | Train energy optimization model | ~5 minutes |
 | `/predict/forecast` | POST | Demand prediction | ~45ms |
 | `/predict/pricing` | POST | Dynamic pricing | ~35ms |
 | `/predict/anomaly` | POST | Anomaly detection | ~55ms |
@@ -240,20 +272,20 @@ curl -X POST "http://localhost:5000/predict/anomaly" \
 
 ```
 ai-ml/
-├── 🐍 app.py                  # FastAPI application ✅
-├── 🐍 test_models.py          # Model testing ✅
-├── 📁 models/                        # Model implementations
-│   ├── 🐍 demand_forecasting.py     ✅
-│   ├── 🐍 dynamic_pricing.py        ✅
-│   ├── 🐍 anomaly_detection.py      ✅
-│   └── 🐍 energy_optimization.py    ✅
-├── 📁 data/                          # Training datasets ✅
+├──  app.py                  # FastAPI application 
+├──  test_models.py          # Model testing 
+├──  models/                        # Model implementations
+│   ├──  demand_forecasting.py     
+│   ├──  dynamic_pricing.py        
+│   ├──  anomaly_detection.py      
+│   └──  energy_optimization.py    
+├──  data/                          # Training datasets 
 │   ├── forecasting/iot_simulation_data.csv (28.9 MB)
 │   ├── pricing/iot_simulation_data.csv     (114.2 MB)
 │   ├── anomaly/iot_simulation_data.csv     (34.6 MB)
 │   └── optimization/iot_simulation_data.csv (61.6 MB)
 ├── data.zip
-├── 📁 models_store/
+├── models_store/
 └── Dockerfile
                   # Saved models (auto-created)
 ```
