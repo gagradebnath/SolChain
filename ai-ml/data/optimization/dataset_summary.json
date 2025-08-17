@@ -1,0 +1,21 @@
+{
+  "total_records": 230480,
+  "total_devices": 80,
+  "total_consumption": 2647370.642,
+  "total_production": 168149.37900000002,
+  "anomaly_count": 5868,
+  "anomaly_rate": 0.025459909753557792,
+  "date_range": {
+    "start": "2025-07-18T00:45:00.546371",
+    "end": "2025-08-17T00:45:00.546371"
+  },
+  "device_types": {
+    "residential_small": 72025,
+    "rural_residential": 46096,
+    "residential_large": 43215,
+    "commercial_small": 28810,
+    "rural_commercial": 20167,
+    "rural_agricultural": 11524,
+    "industrial": 8643
+  }
+}

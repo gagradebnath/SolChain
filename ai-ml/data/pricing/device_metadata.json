@@ -1,0 +1,1202 @@
+[
+  {
+    "deviceId": "DEVICE_001",
+    "deviceType": "rural_commercial",
+    "location": {
+      "city": "Faridpur Rural",
+      "country": "Bangladesh",
+      "lat": 23.607,
+      "lng": 89.8429,
+      "type": "rural"
+    },
+    "baseConsumption": 5.6776996942566,
+    "solarCapacity": 3.7173434605551643,
+    "efficiency": 0.9872878383572141,
+    "hasSmartMeter": true,
+    "hasSolar": true
+  },
+  {
+    "deviceId": "DEVICE_002",
+    "deviceType": "commercial_small",
+    "location": {
+      "city": "Comilla Rural",
+      "country": "Bangladesh",
+      "lat": 23.4607,
+      "lng": 91.1809,
+      "type": "rural"
+    },
+    "baseConsumption": 14.473588204515139,
+    "solarCapacity": 7.675734409902352,
+    "efficiency": 0.8618358787540141,
+    "hasSmartMeter": true,
+    "hasSolar": true
+  },
+  {
+    "deviceId": "DEVICE_003",
+    "deviceType": "rural_residential",
+    "location": {
+      "city": "Barisal",
+      "country": "Bangladesh",
+      "lat": 22.701,
+      "lng": 90.3535,
+      "type": "urban"
+    },
+    "baseConsumption": 1.5902752043026251,
+    "solarCapacity": 1.8157512584923174,
+    "efficiency": 0.8409053384743814,
+    "hasSmartMeter": true,
+    "hasSolar": true
+  },
+  {
+    "deviceId": "DEVICE_004",
+    "deviceType": "industrial",
+    "location": {
+      "city": "Sylhet",
+      "country": "Bangladesh",
+      "lat": 24.8949,
+      "lng": 91.8687,
+      "type": "urban"
+    },
+    "baseConsumption": 104.01439576046062,
+    "solarCapacity": 63.85011422121647,
+    "efficiency": 0.9105860155589188,
+    "hasSmartMeter": true,
+    "hasSolar": true
+  },
+  {
+    "deviceId": "DEVICE_005",
+    "deviceType": "residential_large",
+    "location": {
+      "city": "Barisal",
+      "country": "Bangladesh",
+      "lat": 22.701,
+      "lng": 90.3535,
+      "type": "urban"
+    },
+    "baseConsumption": 9.327795409712499,
+    "solarCapacity": 5.168541564446967,
+    "efficiency": 0.944859189878047,
+    "hasSmartMeter": true,
+    "hasSolar": true
+  },
+  {
+    "deviceId": "DEVICE_006",
+    "deviceType": "residential_large",
+    "location": {
+      "city": "Lakshmipur Rural",
+      "country": "Bangladesh",
+      "lat": 22.9441,
+      "lng": 90.8412,
+      "type": "rural"
+    },
+    "baseConsumption": 7.283717768142963,
+    "solarCapacity": 3.5349655034805325,
+    "efficiency": 0.8873583197526301,
+    "hasSmartMeter": false,
+    "hasSolar": true
+  },
+  {
+    "deviceId": "DEVICE_007",
+    "deviceType": "rural_agricultural",
+    "location": {
+      "city": "Khagrachhari",
+      "country": "Bangladesh",
+      "lat": 23.1193,
+      "lng": 91.9847,
+      "type": "rural"
+    },
+    "baseConsumption": 8.519643346778112,
+    "solarCapacity": 4.499382482836595,
+    "efficiency": 0.9120016573561891,
+    "hasSmartMeter": false,
+    "hasSolar": true
+  },
+  {
+    "deviceId": "DEVICE_008",
+    "deviceType": "residential_small",
+    "location": {
+      "city": "Jamalpur Rural",
+      "country": "Bangladesh",
+      "lat": 24.9375,
+      "lng": 89.937,
+      "type": "rural"
+    },
+    "baseConsumption": 2.1946641019861763,
+    "solarCapacity": 0.0,
+    "efficiency": 0.8083260521334167,
+    "hasSmartMeter": true,
+    "hasSolar": false
+  },
+  {
+    "deviceId": "DEVICE_009",
+    "deviceType": "residential_large",
+    "location": {
+      "city": "Kishoreganj Rural",
+      "country": "Bangladesh",
+      "lat": 24.4449,
+      "lng": 90.7764,
+      "type": "rural"
+    },
+    "baseConsumption": 9.232006198567865,
+    "solarCapacity": 3.5652918663885536,
+    "efficiency": 0.8114587966200058,
+    "hasSmartMeter": true,
+    "hasSolar": true
+  },
+  {
+    "deviceId": "DEVICE_010",
+    "deviceType": "residential_large",
+    "location": {
+      "city": "Jessore Rural",
+      "country": "Bangladesh",
+      "lat": 23.1667,
+      "lng": 89.2167,
+      "type": "rural"
+    },
+    "baseConsumption": 7.947712098712869,
+    "solarCapacity": 3.575063608512818,
+    "efficiency": 0.8177529481983211,
+    "hasSmartMeter": true,
+    "hasSolar": true
+  },
+  {
+    "deviceId": "DEVICE_011",
+    "deviceType": "residential_small",
+    "location": {
+      "city": "Sherpur Rural",
+      "country": "Bangladesh",
+      "lat": 25.0204,
+      "lng": 90.0152,
+      "type": "rural"
+    },
+    "baseConsumption": 2.3110786470584896,
+    "solarCapacity": 0.0,
+    "efficiency": 0.8309572338406239,
+    "hasSmartMeter": false,
+    "hasSolar": false
+  },
+  {
+    "deviceId": "DEVICE_012",
+    "deviceType": "residential_large",
+    "location": {
+      "city": "Faridpur Rural",
+      "country": "Bangladesh",
+      "lat": 23.607,
+      "lng": 89.8429,
+      "type": "rural"
+    },
+    "baseConsumption": 7.235402878021788,
+    "solarCapacity": 4.010240708143266,
+    "efficiency": 0.8259222288568064,
+    "hasSmartMeter": false,
+    "hasSolar": true
+  },
+  {
+    "deviceId": "DEVICE_013",
+    "deviceType": "residential_small",
+    "location": {
+      "city": "Brahmanbaria Rural",
+      "country": "Bangladesh",
+      "lat": 23.9571,
+      "lng": 91.1115,
+      "type": "rural"
+    },
+    "baseConsumption": 2.0879981539987074,
+    "solarCapacity": 0.0,
+    "efficiency": 0.8156855350751638,
+    "hasSmartMeter": true,
+    "hasSolar": false
+  },
+  {
+    "deviceId": "DEVICE_014",
+    "deviceType": "commercial_small",
+    "location": {
+      "city": "Dhaka",
+      "country": "Bangladesh",
+      "lat": 23.8103,
+      "lng": 90.4125,
+      "type": "urban"
+    },
+    "baseConsumption": 17.4382797550245,
+    "solarCapacity": 10.523598147719767,
+    "efficiency": 0.9268878584681477,
+    "hasSmartMeter": false,
+    "hasSolar": true
+  },
+  {
+    "deviceId": "DEVICE_015",
+    "deviceType": "rural_agricultural",
+    "location": {
+      "city": "Jessore Rural",
+      "country": "Bangladesh",
+      "lat": 23.1667,
+      "lng": 89.2167,
+      "type": "rural"
+    },
+    "baseConsumption": 7.148208835865587,
+    "solarCapacity": 4.58666990291052,
+    "efficiency": 0.9132523850898839,
+    "hasSmartMeter": true,
+    "hasSolar": true
+  },
+  {
+    "deviceId": "DEVICE_016",
+    "deviceType": "residential_small",
+    "location": {
+      "city": "Dhaka",
+      "country": "Bangladesh",
+      "lat": 23.8103,
+      "lng": 90.4125,
+      "type": "urban"
+    },
+    "baseConsumption": 2.5853285360323115,
+    "solarCapacity": 0.0,
+    "efficiency": 0.9433795481314915,
+    "hasSmartMeter": true,
+    "hasSolar": false
+  },
+  {
+    "deviceId": "DEVICE_017",
+    "deviceType": "rural_agricultural",
+    "location": {
+      "city": "Tangail Rural",
+      "country": "Bangladesh",
+      "lat": 24.2513,
+      "lng": 89.9167,
+      "type": "rural"
+    },
+    "baseConsumption": 7.142718236865501,
+    "solarCapacity": 7.447004305613537,
+    "efficiency": 0.874522216920275,
+    "hasSmartMeter": true,
+    "hasSolar": true
+  },
+  {
+    "deviceId": "DEVICE_018",
+    "deviceType": "residential_small",
+    "location": {
+      "city": "Faridpur Rural",
+      "country": "Bangladesh",
+      "lat": 23.607,
+      "lng": 89.8429,
+      "type": "rural"
+    },
+    "baseConsumption": 2.6816738897886427,
+    "solarCapacity": 0.0,
+    "efficiency": 0.9823821276399087,
+    "hasSmartMeter": true,
+    "hasSolar": false
+  },
+  {
+    "deviceId": "DEVICE_019",
+    "deviceType": "rural_residential",
+    "location": {
+      "city": "Khulna",
+      "country": "Bangladesh",
+      "lat": 22.8456,
+      "lng": 89.5403,
+      "type": "urban"
+    },
+    "baseConsumption": 1.248800958072367,
+    "solarCapacity": 1.512095660887186,
+    "efficiency": 0.9245612525698883,
+    "hasSmartMeter": true,
+    "hasSolar": true
+  },
+  {
+    "deviceId": "DEVICE_020",
+    "deviceType": "residential_large",
+    "location": {
+      "city": "Khagrachhari",
+      "country": "Bangladesh",
+      "lat": 23.1193,
+      "lng": 91.9847,
+      "type": "rural"
+    },
+    "baseConsumption": 7.86003025132795,
+    "solarCapacity": 3.9194811527848508,
+    "efficiency": 0.9308110793746747,
+    "hasSmartMeter": true,
+    "hasSolar": true
+  },
+  {
+    "deviceId": "DEVICE_021",
+    "deviceType": "rural_residential",
+    "location": {
+      "city": "Dhaka",
+      "country": "Bangladesh",
+      "lat": 23.8103,
+      "lng": 90.4125,
+      "type": "urban"
+    },
+    "baseConsumption": 1.494868426616163,
+    "solarCapacity": 2.4618136961116477,
+    "efficiency": 0.8638192303422048,
+    "hasSmartMeter": true,
+    "hasSolar": true
+  },
+  {
+    "deviceId": "DEVICE_022",
+    "deviceType": "residential_large",
+    "location": {
+      "city": "Habiganj Rural",
+      "country": "Bangladesh",
+      "lat": 24.3745,
+      "lng": 91.4156,
+      "type": "rural"
+    },
+    "baseConsumption": 6.893770782964412,
+    "solarCapacity": 3.732823221792145,
+    "efficiency": 0.9077606148410712,
+    "hasSmartMeter": true,
+    "hasSolar": true
+  },
+  {
+    "deviceId": "DEVICE_023",
+    "deviceType": "residential_small",
+    "location": {
+      "city": "Rajshahi",
+      "country": "Bangladesh",
+      "lat": 24.3636,
+      "lng": 88.6241,
+      "type": "urban"
+    },
+    "baseConsumption": 2.7031401154628543,
+    "solarCapacity": 0.0,
+    "efficiency": 0.8055763191789042,
+    "hasSmartMeter": true,
+    "hasSolar": false
+  },
+  {
+    "deviceId": "DEVICE_024",
+    "deviceType": "residential_large",
+    "location": {
+      "city": "Sylhet",
+      "country": "Bangladesh",
+      "lat": 24.8949,
+      "lng": 91.8687,
+      "type": "urban"
+    },
+    "baseConsumption": 7.202226040495823,
+    "solarCapacity": 3.960794932521666,
+    "efficiency": 0.9415557604933976,
+    "hasSmartMeter": true,
+    "hasSolar": true
+  },
+  {
+    "deviceId": "DEVICE_025",
+    "deviceType": "rural_commercial",
+    "location": {
+      "city": "Dinajpur Rural",
+      "country": "Bangladesh",
+      "lat": 25.6217,
+      "lng": 88.6354,
+      "type": "rural"
+    },
+    "baseConsumption": 4.059083575171155,
+    "solarCapacity": 2.537354034909032,
+    "efficiency": 0.8134997003266635,
+    "hasSmartMeter": true,
+    "hasSolar": true
+  },
+  {
+    "deviceId": "DEVICE_026",
+    "deviceType": "residential_large",
+    "location": {
+      "city": "Chittagong",
+      "country": "Bangladesh",
+      "lat": 22.3569,
+      "lng": 91.7832,
+      "type": "urban"
+    },
+    "baseConsumption": 7.112045300088974,
+    "solarCapacity": 4.344444572970117,
+    "efficiency": 0.8452358275906455,
+    "hasSmartMeter": true,
+    "hasSolar": true
+  },
+  {
+    "deviceId": "DEVICE_027",
+    "deviceType": "industrial",
+    "location": {
+      "city": "Dinajpur Rural",
+      "country": "Bangladesh",
+      "lat": 25.6217,
+      "lng": 88.6354,
+      "type": "rural"
+    },
+    "baseConsumption": 114.4222647585492,
+    "solarCapacity": 38.755480298793834,
+    "efficiency": 0.8422747904241037,
+    "hasSmartMeter": true,
+    "hasSolar": true
+  },
+  {
+    "deviceId": "DEVICE_028",
+    "deviceType": "rural_residential",
+    "location": {
+      "city": "Comilla Rural",
+      "country": "Bangladesh",
+      "lat": 23.4607,
+      "lng": 91.1809,
+      "type": "rural"
+    },
+    "baseConsumption": 1.217991347059228,
+    "solarCapacity": 2.275577595801419,
+    "efficiency": 0.9330495298499367,
+    "hasSmartMeter": true,
+    "hasSolar": true
+  },
+  {
+    "deviceId": "DEVICE_029",
+    "deviceType": "residential_small",
+    "location": {
+      "city": "Rajshahi",
+      "country": "Bangladesh",
+      "lat": 24.3636,
+      "lng": 88.6241,
+      "type": "urban"
+    },
+    "baseConsumption": 2.237915448835949,
+    "solarCapacity": 0.0,
+    "efficiency": 0.8772667227496822,
+    "hasSmartMeter": true,
+    "hasSolar": false
+  },
+  {
+    "deviceId": "DEVICE_030",
+    "deviceType": "residential_large",
+    "location": {
+      "city": "Bogura Rural",
+      "country": "Bangladesh",
+      "lat": 24.8465,
+      "lng": 89.3776,
+      "type": "rural"
+    },
+    "baseConsumption": 7.827572457581936,
+    "solarCapacity": 5.035811332267658,
+    "efficiency": 0.8695207167049226,
+    "hasSmartMeter": true,
+    "hasSolar": true
+  },
+  {
+    "deviceId": "DEVICE_031",
+    "deviceType": "rural_commercial",
+    "location": {
+      "city": "Barisal",
+      "country": "Bangladesh",
+      "lat": 22.701,
+      "lng": 90.3535,
+      "type": "urban"
+    },
+    "baseConsumption": 4.558129144534289,
+    "solarCapacity": 2.9160858612945493,
+    "efficiency": 0.9781897666986457,
+    "hasSmartMeter": true,
+    "hasSolar": true
+  },
+  {
+    "deviceId": "DEVICE_032",
+    "deviceType": "residential_small",
+    "location": {
+      "city": "Khagrachhari",
+      "country": "Bangladesh",
+      "lat": 23.1193,
+      "lng": 91.9847,
+      "type": "rural"
+    },
+    "baseConsumption": 2.138115952702463,
+    "solarCapacity": 0.0,
+    "efficiency": 0.9524819786773919,
+    "hasSmartMeter": true,
+    "hasSolar": false
+  },
+  {
+    "deviceId": "DEVICE_033",
+    "deviceType": "residential_large",
+    "location": {
+      "city": "Mymensingh Rural",
+      "country": "Bangladesh",
+      "lat": 24.7471,
+      "lng": 90.4203,
+      "type": "rural"
+    },
+    "baseConsumption": 9.283712560735095,
+    "solarCapacity": 5.932140846689743,
+    "efficiency": 0.9521962899709664,
+    "hasSmartMeter": true,
+    "hasSolar": true
+  },
+  {
+    "deviceId": "DEVICE_034",
+    "deviceType": "rural_residential",
+    "location": {
+      "city": "Rajshahi",
+      "country": "Bangladesh",
+      "lat": 24.3636,
+      "lng": 88.6241,
+      "type": "urban"
+    },
+    "baseConsumption": 1.4255014120161886,
+    "solarCapacity": 1.9237930849896927,
+    "efficiency": 0.9282264388611012,
+    "hasSmartMeter": true,
+    "hasSolar": true
+  },
+  {
+    "deviceId": "DEVICE_035",
+    "deviceType": "residential_large",
+    "location": {
+      "city": "Rangamati",
+      "country": "Bangladesh",
+      "lat": 22.6533,
+      "lng": 92.1815,
+      "type": "rural"
+    },
+    "baseConsumption": 7.915579194577787,
+    "solarCapacity": 5.654666002505634,
+    "efficiency": 0.8588002120953918,
+    "hasSmartMeter": true,
+    "hasSolar": true
+  },
+  {
+    "deviceId": "DEVICE_036",
+    "deviceType": "rural_commercial",
+    "location": {
+      "city": "Barisal",
+      "country": "Bangladesh",
+      "lat": 22.701,
+      "lng": 90.3535,
+      "type": "urban"
+    },
+    "baseConsumption": 5.273142978936809,
+    "solarCapacity": 3.2691547291541054,
+    "efficiency": 0.9378599774361762,
+    "hasSmartMeter": false,
+    "hasSolar": true
+  },
+  {
+    "deviceId": "DEVICE_037",
+    "deviceType": "residential_small",
+    "location": {
+      "city": "Tangail Rural",
+      "country": "Bangladesh",
+      "lat": 24.2513,
+      "lng": 89.9167,
+      "type": "rural"
+    },
+    "baseConsumption": 2.493511519051058,
+    "solarCapacity": 0.0,
+    "efficiency": 0.9817074319602486,
+    "hasSmartMeter": true,
+    "hasSolar": false
+  },
+  {
+    "deviceId": "DEVICE_038",
+    "deviceType": "industrial",
+    "location": {
+      "city": "Faridpur Rural",
+      "country": "Bangladesh",
+      "lat": 23.607,
+      "lng": 89.8429,
+      "type": "rural"
+    },
+    "baseConsumption": 117.60960484081018,
+    "solarCapacity": 45.36545422682306,
+    "efficiency": 0.8631205025439508,
+    "hasSmartMeter": true,
+    "hasSolar": true
+  },
+  {
+    "deviceId": "DEVICE_039",
+    "deviceType": "commercial_small",
+    "location": {
+      "city": "Kushtia Rural",
+      "country": "Bangladesh",
+      "lat": 23.9013,
+      "lng": 89.1206,
+      "type": "rural"
+    },
+    "baseConsumption": 13.442968355830754,
+    "solarCapacity": 8.837980400523467,
+    "efficiency": 0.8330920699666411,
+    "hasSmartMeter": false,
+    "hasSolar": true
+  },
+  {
+    "deviceId": "DEVICE_040",
+    "deviceType": "residential_large",
+    "location": {
+      "city": "Dhaka",
+      "country": "Bangladesh",
+      "lat": 23.8103,
+      "lng": 90.4125,
+      "type": "urban"
+    },
+    "baseConsumption": 6.429731586777429,
+    "solarCapacity": 5.3800381395731005,
+    "efficiency": 0.9452073611059579,
+    "hasSmartMeter": true,
+    "hasSolar": true
+  },
+  {
+    "deviceId": "DEVICE_041",
+    "deviceType": "rural_agricultural",
+    "location": {
+      "city": "Faridpur Rural",
+      "country": "Bangladesh",
+      "lat": 23.607,
+      "lng": 89.8429,
+      "type": "rural"
+    },
+    "baseConsumption": 7.20324291810918,
+    "solarCapacity": 6.3891587636019676,
+    "efficiency": 0.9349298469549895,
+    "hasSmartMeter": true,
+    "hasSolar": true
+  },
+  {
+    "deviceId": "DEVICE_042",
+    "deviceType": "residential_small",
+    "location": {
+      "city": "Chittagong",
+      "country": "Bangladesh",
+      "lat": 22.3569,
+      "lng": 91.7832,
+      "type": "urban"
+    },
+    "baseConsumption": 2.3025665142195746,
+    "solarCapacity": 0.0,
+    "efficiency": 0.9634862309310571,
+    "hasSmartMeter": true,
+    "hasSolar": false
+  },
+  {
+    "deviceId": "DEVICE_043",
+    "deviceType": "rural_commercial",
+    "location": {
+      "city": "Kishoreganj Rural",
+      "country": "Bangladesh",
+      "lat": 24.4449,
+      "lng": 90.7764,
+      "type": "rural"
+    },
+    "baseConsumption": 4.308397607072941,
+    "solarCapacity": 2.6058643588053183,
+    "efficiency": 0.9756043158286862,
+    "hasSmartMeter": true,
+    "hasSolar": true
+  },
+  {
+    "deviceId": "DEVICE_044",
+    "deviceType": "rural_commercial",
+    "location": {
+      "city": "Chittagong",
+      "country": "Bangladesh",
+      "lat": 22.3569,
+      "lng": 91.7832,
+      "type": "urban"
+    },
+    "baseConsumption": 4.396413027272901,
+    "solarCapacity": 2.337232202246298,
+    "efficiency": 0.8834576432237162,
+    "hasSmartMeter": false,
+    "hasSolar": true
+  },
+  {
+    "deviceId": "DEVICE_045",
+    "deviceType": "rural_residential",
+    "location": {
+      "city": "Dhaka",
+      "country": "Bangladesh",
+      "lat": 23.8103,
+      "lng": 90.4125,
+      "type": "urban"
+    },
+    "baseConsumption": 1.3369513042405774,
+    "solarCapacity": 2.0012007249659813,
+    "efficiency": 0.9197960124427761,
+    "hasSmartMeter": false,
+    "hasSolar": true
+  },
+  {
+    "deviceId": "DEVICE_046",
+    "deviceType": "residential_small",
+    "location": {
+      "city": "Lakshmipur Rural",
+      "country": "Bangladesh",
+      "lat": 22.9441,
+      "lng": 90.8412,
+      "type": "rural"
+    },
+    "baseConsumption": 2.488414401509571,
+    "solarCapacity": 0.0,
+    "efficiency": 0.8220931814605216,
+    "hasSmartMeter": true,
+    "hasSolar": false
+  },
+  {
+    "deviceId": "DEVICE_047",
+    "deviceType": "residential_small",
+    "location": {
+      "city": "Khagrachhari",
+      "country": "Bangladesh",
+      "lat": 23.1193,
+      "lng": 91.9847,
+      "type": "rural"
+    },
+    "baseConsumption": 2.106597554875376,
+    "solarCapacity": 0.0,
+    "efficiency": 0.8360908262177044,
+    "hasSmartMeter": true,
+    "hasSolar": false
+  },
+  {
+    "deviceId": "DEVICE_048",
+    "deviceType": "commercial_small",
+    "location": {
+      "city": "Pabna Rural",
+      "country": "Bangladesh",
+      "lat": 24.0064,
+      "lng": 89.2372,
+      "type": "rural"
+    },
+    "baseConsumption": 14.632958130610868,
+    "solarCapacity": 9.515975152898317,
+    "efficiency": 0.9429928087119486,
+    "hasSmartMeter": true,
+    "hasSolar": true
+  },
+  {
+    "deviceId": "DEVICE_049",
+    "deviceType": "rural_residential",
+    "location": {
+      "city": "Bandarban",
+      "country": "Bangladesh",
+      "lat": 22.1953,
+      "lng": 92.2183,
+      "type": "rural"
+    },
+    "baseConsumption": 1.3034698384776098,
+    "solarCapacity": 2.3232221172853498,
+    "efficiency": 0.87792370979123,
+    "hasSmartMeter": true,
+    "hasSolar": true
+  },
+  {
+    "deviceId": "DEVICE_050",
+    "deviceType": "industrial",
+    "location": {
+      "city": "Lakshmipur Rural",
+      "country": "Bangladesh",
+      "lat": 22.9441,
+      "lng": 90.8412,
+      "type": "rural"
+    },
+    "baseConsumption": 99.68762450125179,
+    "solarCapacity": 56.844318699804944,
+    "efficiency": 0.8566778089155267,
+    "hasSmartMeter": true,
+    "hasSolar": true
+  },
+  {
+    "deviceId": "DEVICE_051",
+    "deviceType": "residential_large",
+    "location": {
+      "city": "Rajshahi",
+      "country": "Bangladesh",
+      "lat": 24.3636,
+      "lng": 88.6241,
+      "type": "urban"
+    },
+    "baseConsumption": 8.40564402419651,
+    "solarCapacity": 5.402640789855328,
+    "efficiency": 0.985210533181099,
+    "hasSmartMeter": false,
+    "hasSolar": true
+  },
+  {
+    "deviceId": "DEVICE_052",
+    "deviceType": "rural_agricultural",
+    "location": {
+      "city": "Brahmanbaria Rural",
+      "country": "Bangladesh",
+      "lat": 23.9571,
+      "lng": 91.1115,
+      "type": "rural"
+    },
+    "baseConsumption": 6.850263614044705,
+    "solarCapacity": 6.525860169384437,
+    "efficiency": 0.9365358329413137,
+    "hasSmartMeter": true,
+    "hasSolar": true
+  },
+  {
+    "deviceId": "DEVICE_053",
+    "deviceType": "rural_residential",
+    "location": {
+      "city": "Rajshahi",
+      "country": "Bangladesh",
+      "lat": 24.3636,
+      "lng": 88.6241,
+      "type": "urban"
+    },
+    "baseConsumption": 1.3323525656485526,
+    "solarCapacity": 1.8575616793351974,
+    "efficiency": 0.8799533989870592,
+    "hasSmartMeter": true,
+    "hasSolar": true
+  },
+  {
+    "deviceId": "DEVICE_054",
+    "deviceType": "rural_residential",
+    "location": {
+      "city": "Kushtia Rural",
+      "country": "Bangladesh",
+      "lat": 23.9013,
+      "lng": 89.1206,
+      "type": "rural"
+    },
+    "baseConsumption": 1.576817997293844,
+    "solarCapacity": 1.7396701750338268,
+    "efficiency": 0.877156763080523,
+    "hasSmartMeter": true,
+    "hasSolar": true
+  },
+  {
+    "deviceId": "DEVICE_055",
+    "deviceType": "residential_large",
+    "location": {
+      "city": "Sherpur Rural",
+      "country": "Bangladesh",
+      "lat": 25.0204,
+      "lng": 90.0152,
+      "type": "rural"
+    },
+    "baseConsumption": 9.170802464016049,
+    "solarCapacity": 4.356986548454294,
+    "efficiency": 0.8885798420868393,
+    "hasSmartMeter": true,
+    "hasSolar": true
+  },
+  {
+    "deviceId": "DEVICE_056",
+    "deviceType": "residential_large",
+    "location": {
+      "city": "Sherpur Rural",
+      "country": "Bangladesh",
+      "lat": 25.0204,
+      "lng": 90.0152,
+      "type": "rural"
+    },
+    "baseConsumption": 8.652622228087402,
+    "solarCapacity": 4.844332156104364,
+    "efficiency": 0.8917019576538388,
+    "hasSmartMeter": false,
+    "hasSolar": true
+  },
+  {
+    "deviceId": "DEVICE_057",
+    "deviceType": "commercial_small",
+    "location": {
+      "city": "Jessore Rural",
+      "country": "Bangladesh",
+      "lat": 23.1667,
+      "lng": 89.2167,
+      "type": "rural"
+    },
+    "baseConsumption": 13.981947158244424,
+    "solarCapacity": 7.529999831466832,
+    "efficiency": 0.885252918004079,
+    "hasSmartMeter": true,
+    "hasSolar": true
+  },
+  {
+    "deviceId": "DEVICE_058",
+    "deviceType": "residential_small",
+    "location": {
+      "city": "Netrokona Rural",
+      "country": "Bangladesh",
+      "lat": 24.8809,
+      "lng": 90.7279,
+      "type": "rural"
+    },
+    "baseConsumption": 2.4108701377141935,
+    "solarCapacity": 0.0,
+    "efficiency": 0.8215225599508916,
+    "hasSmartMeter": true,
+    "hasSolar": false
+  },
+  {
+    "deviceId": "DEVICE_059",
+    "deviceType": "residential_large",
+    "location": {
+      "city": "Sherpur Rural",
+      "country": "Bangladesh",
+      "lat": 25.0204,
+      "lng": 90.0152,
+      "type": "rural"
+    },
+    "baseConsumption": 7.230818007866901,
+    "solarCapacity": 4.505909746411128,
+    "efficiency": 0.8419980439267738,
+    "hasSmartMeter": true,
+    "hasSolar": true
+  },
+  {
+    "deviceId": "DEVICE_060",
+    "deviceType": "residential_small",
+    "location": {
+      "city": "Tangail Rural",
+      "country": "Bangladesh",
+      "lat": 24.2513,
+      "lng": 89.9167,
+      "type": "rural"
+    },
+    "baseConsumption": 2.5907226139740964,
+    "solarCapacity": 0.0,
+    "efficiency": 0.9866343718767505,
+    "hasSmartMeter": true,
+    "hasSolar": false
+  },
+  {
+    "deviceId": "DEVICE_061",
+    "deviceType": "residential_large",
+    "location": {
+      "city": "Mymensingh Rural",
+      "country": "Bangladesh",
+      "lat": 24.7471,
+      "lng": 90.4203,
+      "type": "rural"
+    },
+    "baseConsumption": 7.472103393869807,
+    "solarCapacity": 4.839143096723796,
+    "efficiency": 0.8009053552491767,
+    "hasSmartMeter": true,
+    "hasSolar": true
+  },
+  {
+    "deviceId": "DEVICE_062",
+    "deviceType": "residential_small",
+    "location": {
+      "city": "Dhaka",
+      "country": "Bangladesh",
+      "lat": 23.8103,
+      "lng": 90.4125,
+      "type": "urban"
+    },
+    "baseConsumption": 2.228575176119178,
+    "solarCapacity": 0.0,
+    "efficiency": 0.9900252580348465,
+    "hasSmartMeter": true,
+    "hasSolar": false
+  },
+  {
+    "deviceId": "DEVICE_063",
+    "deviceType": "rural_commercial",
+    "location": {
+      "city": "Brahmanbaria Rural",
+      "country": "Bangladesh",
+      "lat": 23.9571,
+      "lng": 91.1115,
+      "type": "rural"
+    },
+    "baseConsumption": 5.544129077509133,
+    "solarCapacity": 3.7406934399532377,
+    "efficiency": 0.8604403771481647,
+    "hasSmartMeter": true,
+    "hasSolar": true
+  },
+  {
+    "deviceId": "DEVICE_064",
+    "deviceType": "rural_residential",
+    "location": {
+      "city": "Comilla Rural",
+      "country": "Bangladesh",
+      "lat": 23.4607,
+      "lng": 91.1809,
+      "type": "rural"
+    },
+    "baseConsumption": 1.7812912115480395,
+    "solarCapacity": 2.288542020098842,
+    "efficiency": 0.9227301149025098,
+    "hasSmartMeter": true,
+    "hasSolar": true
+  },
+  {
+    "deviceId": "DEVICE_065",
+    "deviceType": "industrial",
+    "location": {
+      "city": "Kushtia Rural",
+      "country": "Bangladesh",
+      "lat": 23.9013,
+      "lng": 89.1206,
+      "type": "rural"
+    },
+    "baseConsumption": 80.9514023811469,
+    "solarCapacity": 51.14646695632459,
+    "efficiency": 0.9636377234921664,
+    "hasSmartMeter": true,
+    "hasSolar": true
+  },
+  {
+    "deviceId": "DEVICE_066",
+    "deviceType": "rural_commercial",
+    "location": {
+      "city": "Dinajpur Rural",
+      "country": "Bangladesh",
+      "lat": 25.6217,
+      "lng": 88.6354,
+      "type": "rural"
+    },
+    "baseConsumption": 5.433299345421233,
+    "solarCapacity": 3.6993702683956684,
+    "efficiency": 0.910167222513145,
+    "hasSmartMeter": true,
+    "hasSolar": true
+  },
+  {
+    "deviceId": "DEVICE_067",
+    "deviceType": "commercial_small",
+    "location": {
+      "city": "Bogura Rural",
+      "country": "Bangladesh",
+      "lat": 24.8465,
+      "lng": 89.3776,
+      "type": "rural"
+    },
+    "baseConsumption": 16.601530897936048,
+    "solarCapacity": 10.528122360195301,
+    "efficiency": 0.9008071959271268,
+    "hasSmartMeter": true,
+    "hasSolar": true
+  },
+  {
+    "deviceId": "DEVICE_068",
+    "deviceType": "residential_large",
+    "location": {
+      "city": "Jessore Rural",
+      "country": "Bangladesh",
+      "lat": 23.1667,
+      "lng": 89.2167,
+      "type": "rural"
+    },
+    "baseConsumption": 7.175281360741492,
+    "solarCapacity": 5.6910633750890725,
+    "efficiency": 0.8276703183781193,
+    "hasSmartMeter": true,
+    "hasSolar": true
+  },
+  {
+    "deviceId": "DEVICE_069",
+    "deviceType": "residential_large",
+    "location": {
+      "city": "Dinajpur Rural",
+      "country": "Bangladesh",
+      "lat": 25.6217,
+      "lng": 88.6354,
+      "type": "rural"
+    },
+    "baseConsumption": 6.9754604654305385,
+    "solarCapacity": 4.276376955387067,
+    "efficiency": 0.8126240368162788,
+    "hasSmartMeter": true,
+    "hasSolar": true
+  },
+  {
+    "deviceId": "DEVICE_070",
+    "deviceType": "residential_small",
+    "location": {
+      "city": "Comilla Rural",
+      "country": "Bangladesh",
+      "lat": 23.4607,
+      "lng": 91.1809,
+      "type": "rural"
+    },
+    "baseConsumption": 2.7439846800306054,
+    "solarCapacity": 0.0,
+    "efficiency": 0.986507175891565,
+    "hasSmartMeter": true,
+    "hasSolar": false
+  },
+  {
+    "deviceId": "DEVICE_071",
+    "deviceType": "residential_small",
+    "location": {
+      "city": "Kushtia Rural",
+      "country": "Bangladesh",
+      "lat": 23.9013,
+      "lng": 89.1206,
+      "type": "rural"
+    },
+    "baseConsumption": 2.0168619322311967,
+    "solarCapacity": 0.0,
+    "efficiency": 0.8367966837237382,
+    "hasSmartMeter": true,
+    "hasSolar": false
+  },
+  {
+    "deviceId": "DEVICE_072",
+    "deviceType": "commercial_small",
+    "location": {
+      "city": "Habiganj Rural",
+      "country": "Bangladesh",
+      "lat": 24.3745,
+      "lng": 91.4156,
+      "type": "rural"
+    },
+    "baseConsumption": 13.114429896329854,
+    "solarCapacity": 8.294343686640953,
+    "efficiency": 0.8045443392259407,
+    "hasSmartMeter": true,
+    "hasSolar": true
+  },
+  {
+    "deviceId": "DEVICE_073",
+    "deviceType": "rural_residential",
+    "location": {
+      "city": "Kushtia Rural",
+      "country": "Bangladesh",
+      "lat": 23.9013,
+      "lng": 89.1206,
+      "type": "rural"
+    },
+    "baseConsumption": 1.2317879118055446,
+    "solarCapacity": 2.530340276445303,
+    "efficiency": 0.8117154682603657,
+    "hasSmartMeter": true,
+    "hasSolar": true
+  },
+  {
+    "deviceId": "DEVICE_074",
+    "deviceType": "rural_commercial",
+    "location": {
+      "city": "Dinajpur Rural",
+      "country": "Bangladesh",
+      "lat": 25.6217,
+      "lng": 88.6354,
+      "type": "rural"
+    },
+    "baseConsumption": 4.737426303734938,
+    "solarCapacity": 2.328188781668099,
+    "efficiency": 0.9076061970890306,
+    "hasSmartMeter": true,
+    "hasSolar": true
+  },
+  {
+    "deviceId": "DEVICE_075",
+    "deviceType": "residential_small",
+    "location": {
+      "city": "Kushtia Rural",
+      "country": "Bangladesh",
+      "lat": 23.9013,
+      "lng": 89.1206,
+      "type": "rural"
+    },
+    "baseConsumption": 2.5875858880587064,
+    "solarCapacity": 0.0,
+    "efficiency": 0.8777941320130047,
+    "hasSmartMeter": true,
+    "hasSolar": false
+  }
+]
