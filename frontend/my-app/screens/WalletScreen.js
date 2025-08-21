@@ -1,7 +1,13 @@
-// WalletScreen.js
+/**
+ * Wallet Components
+ *
+ * SolarToken wallet management and transactions
+ *
+ * @author Team GreyDevs
+ */
 
 import React, { useState } from 'react';
-import {ScrollView, View, Text, SafeAreaView, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, SafeAreaView, ScrollView, FlatList, TouchableOpacity } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Feather } from '@expo/vector-icons';
 import styles from '../styles/WalletStyles';
@@ -50,43 +56,54 @@ const DUMMY_TRANSACTIONS = [
     },
 ];
 
+const DUMMY_BALANCE = {
+    solarToken: '10.45 SOL',
+    energyCredits: '250',
+};
+
 // --- TRANSLATIONS ---
 const translations = {
     en: {
-        title: 'Wallet',
+        title: 'My Wallet',
         balance: 'Current Balance',
-        solBalance: 'SOL Balance',
+        solBalance: 'SolarToken Balance',
         energyCredits: 'Energy Credits',
-        transactions: 'Transaction History',
+        transactions: 'Recent Transactions',
         send: 'Send',
         receive: 'Receive',
-        connectWallet: 'Connect Wallet',
+        swap: 'Swap',
+        buy: 'Buy with bKash',
+        staking: 'Staking',
+        security: 'Security',
+        hardwareWallet: 'Hardware Wallet',
+        recovery: 'Recovery Phrase',
+        export: 'Export Wallet',
     },
     bn: {
-        title: 'ওয়ালেট',
+        title: 'আমার ওয়ালেট',
         balance: 'বর্তমান ব্যালেন্স',
-        solBalance: 'SOL ব্যালেন্স',
+        solBalance: 'সোলারটোকেন ব্যালেন্স',
         energyCredits: 'এনার্জি ক্রেডিট',
-        transactions: 'লেনদেনের ইতিহাস',
+        transactions: 'সাম্প্রতিক লেনদেন',
         send: 'পাঠান',
         receive: 'গ্রহণ করুন',
-        connectWallet: 'ওয়ালেট সংযুক্ত করুন',
+        swap: 'অদল-বদল',
+        buy: 'বিকাশ দিয়ে কিনুন',
+        staking: 'স্টেকিং',
+        security: 'নিরাপত্তা',
+        hardwareWallet: 'হার্ডওয়্যার ওয়ালেট',
+        recovery: 'রিকভারি ফ্রেজ',
+        export: 'ওয়ালেট এক্সপোর্ট',
     },
 };
 
-// --- ICON MAPPING ---
 const getIconForType = (type) => {
     switch (type) {
-        case 'buy':
-            return 'arrow-down-left';
-        case 'sell':
-            return 'arrow-up-right';
-        case 'staking':
-            return 'zap';
-        case 'carbon_credit':
-            return 'leaf';
-        default:
-            return 'info';
+        case 'buy': return 'arrow-down-left';
+        case 'sell': return 'arrow-up-right';
+        case 'staking': return 'zap';
+        case 'carbon_credit': return 'leaf';
+        default: return 'info';
     }
 };
 
@@ -95,9 +112,9 @@ const getTxColor = (type) => {
         case 'sell':
         case 'staking':
         case 'carbon_credit':
-            return '#4CAF50'; // Green
+            return '#4CAF50';
         case 'buy':
-            return '#F44336'; // Red
+            return '#F44336';
         default:
             return '#333';
     }
@@ -125,6 +142,21 @@ export default function WalletScreen() {
         </View>
     );
 
+    const ActionButton = ({ icon, text, onPress }) => (
+        <TouchableOpacity style={styles.actionButton} onPress={onPress}>
+            <Feather name={icon} size={24} color="#007AFF" />
+            <Text style={styles.actionText}>{text}</Text>
+        </TouchableOpacity>
+    );
+
+    const SettingsButton = ({ icon, text, onPress }) => (
+        <TouchableOpacity style={styles.settingsButton} onPress={onPress}>
+            <Feather name={icon} size={20} color="#333" />
+            <Text style={styles.settingsText}>{text}</Text>
+            <Feather name="chevron-right" size={20} color="#999" style={{ marginLeft: 'auto' }} />
+        </TouchableOpacity>
+    );
+
     return (
         <SafeAreaView style={styles.safeArea}>
             <StatusBar style="dark" />
@@ -136,30 +168,31 @@ export default function WalletScreen() {
             </View>
 
             <ScrollView style={styles.container}>
-                {/* Balance Card */}
+                {/* WalletOverview - Main Balance Display */}
                 <View style={[styles.balanceCard, styles.cardShadow]}>
                     <Text style={styles.balanceLabel}>{t.balance}</Text>
-                    <Text style={styles.solBalance}>10.45 SOL</Text>
-                    <Text style={styles.energyCredits}>250 Energy Credits</Text>
+                    <Text style={styles.solBalance}>{DUMMY_BALANCE.solarToken}</Text>
+                    <Text style={styles.energyCredits}>{DUMMY_BALANCE.energyCredits} {t.energyCredits}</Text>
                 </View>
 
-                {/* Wallet Actions */}
+                {/* Send, Receive, Swap Actions */}
                 <View style={styles.walletActions}>
-                    <TouchableOpacity style={styles.actionButton}>
-                        <Feather name="arrow-up" size={24} color="#007AFF" />
-                        <Text style={styles.actionText}>{t.send}</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.actionButton}>
-                        <Feather name="arrow-down" size={24} color="#007AFF" />
-                        <Text style={styles.actionText}>{t.receive}</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.actionButton}>
-                        <Feather name="link" size={24} color="#007AFF" />
-                        <Text style={styles.actionText}>{t.connectWallet}</Text>
-                    </TouchableOpacity>
+                    <ActionButton icon="arrow-up" text={t.send} onPress={() => { /* Navigate to SendTokens screen */ }} />
+                    <ActionButton icon="arrow-down" text={t.receive} onPress={() => { /* Navigate to ReceiveTokens screen */ }} />
+                    <ActionButton icon="repeat" text={t.swap} onPress={() => { /* Navigate to TokenSwap screen */ }} />
                 </View>
 
-                {/* Transaction History */}
+                {/* Fiat Payment Gateway (bKash) */}
+                <View style={[styles.paymentCard, styles.cardShadow]}>
+                    <Feather name="shopping-bag" size={24} color="#007AFF" />
+                    <View style={styles.paymentTextContainer}>
+                        <Text style={styles.paymentTitle}>{t.buy}</Text>
+                        <Text style={styles.paymentSubtitle}>Via bKash, Nagad, etc.</Text>
+                    </View>
+                    <Feather name="chevron-right" size={24} color="#007AFF" />
+                </View>
+
+                {/* TransactionHistory */}
                 <Text style={styles.sectionTitle}>{t.transactions}</Text>
                 <FlatList
                     data={DUMMY_TRANSACTIONS}
@@ -167,6 +200,16 @@ export default function WalletScreen() {
                     keyExtractor={item => item.id}
                     scrollEnabled={false}
                 />
+
+                {/* Additional Functions as a separate settings section */}
+                <Text style={styles.sectionTitle}>More Options</Text>
+                <View style={[styles.settingsCard, styles.cardShadow]}>
+                    <SettingsButton icon="zap" text={t.staking} onPress={() => { /* Navigate to StakingInterface */ }} />
+                    <SettingsButton icon="lock" text={t.security} onPress={() => { /* Navigate to WalletSecurity */ }} />
+                    <SettingsButton icon="hard-drive" text={t.hardwareWallet} onPress={() => { /* Navigate to HardwareWallet */ }} />
+                    <SettingsButton icon="refresh-ccw" text={t.recovery} onPress={() => { /* Navigate to RecoveryPhrase */ }} />
+                    <SettingsButton icon="download" text={t.export} onPress={() => { /* Navigate to WalletExport */ }} />
+                </View>
             </ScrollView>
         </SafeAreaView>
     );

@@ -1,3 +1,5 @@
+// WalletStyles.js
+
 import { StyleSheet } from 'react-native';
 
 const styles = StyleSheet.create({
@@ -37,7 +39,7 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
         elevation: 3,
     },
-    // Balance Card
+    // WalletOverview
     balanceCard: {
         backgroundColor: '#007AFF',
         borderRadius: 15,
@@ -73,11 +75,7 @@ const styles = StyleSheet.create({
         borderRadius: 15,
         padding: 15,
         width: '30%',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 3,
+        ...StyleSheet.cardShadow,
     },
     actionText: {
         marginTop: 5,
@@ -85,7 +83,30 @@ const styles = StyleSheet.create({
         color: '#007AFF',
         fontWeight: '600',
     },
-    // Transaction History
+    // Fiat Payment Gateway
+    paymentCard: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#E6F3FF', // Light blue background
+        borderRadius: 15,
+        padding: 20,
+        marginBottom: 20,
+    },
+    paymentTextContainer: {
+        flex: 1,
+        marginLeft: 15,
+    },
+    paymentTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#007AFF',
+    },
+    paymentSubtitle: {
+        fontSize: 14,
+        color: '#007AFF',
+        marginTop: 2,
+    },
+    // TransactionHistory
     sectionTitle: {
         fontSize: 20,
         fontWeight: 'bold',
@@ -100,11 +121,7 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         padding: 15,
         marginBottom: 10,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 3,
+        ...StyleSheet.cardShadow,
     },
     transactionDetails: {
         flex: 1,
@@ -131,6 +148,26 @@ const styles = StyleSheet.create({
         fontSize: 12,
         color: '#999',
         marginTop: 2,
+    },
+    // Other Settings
+    settingsCard: {
+        backgroundColor: '#fff',
+        borderRadius: 15,
+        padding: 10,
+        marginBottom: 20,
+    },
+    settingsButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 15,
+        paddingHorizontal: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: '#E0E0E0',
+    },
+    settingsText: {
+        fontSize: 16,
+        marginLeft: 15,
+        color: '#333',
     },
 });
 
