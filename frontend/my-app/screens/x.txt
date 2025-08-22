@@ -1,0 +1,64 @@
+1. Authentication & Setup
+Login / Register
+Email / Wallet login (Phantom, Solflare integration if Solana-based)
+Sign in with blockchain wallet
+Onboarding Wizard
+Connect solar device / meter
+Set location, house/office details
+Energy sharing preferences (auto sell excess, auto buy shortage)
+
+2. Home / Dashboard (You already have this)
+Energy overview (production, consumption, balance, savings)
+Quick actions (Buy, Sell, Transfer, Stats)
+Market prices (buy/sell rates in SOL/kWh)
+Weather widget (solar prediction)
+Goals (energy savings, earnings)
+Notifications (maintenance, achievements)
+
+3. Energy Trading / Marketplace
+Buy Energy
+Choose seller (peer-to-peer or from grid)
+Show rate per kWh, available units, trust score
+Pay with SOL (integrated with wallet)
+Sell Energy
+Set price per kWh (or accept market rate)
+List available kWh
+Track live demand
+Order Book / Market View
+Current buy/sell offers
+Graph of market activity
+
+4. Wallet & Transactions
+Wallet balance (SOL + tokenized energy credits)
+Transaction history (buy, sell, staking, carbon credits)
+Send/receive SOL or EnergyTokens
+Connect external wallet
+
+5. Statistics & Reports
+Daily / Weekly / Monthly energy production & consumption
+Earnings from selling energy
+Expenses from buying energy
+Carbon credits generated (green impact)
+Exportable PDF/CSV report
+
+6. Community / P2P Network
+List of nearby users in microgrid (optional map view)
+Trading history with peers
+Chat / Messaging (like your earlier project with Socket.IO)
+
+7. Goals & Gamification
+Savings target, earnings target
+Badges for “Green Contributor”, “Top Seller”, etc.
+Leaderboard of top energy traders in community
+
+8. Admin / Utility (optional, if multi-role app)
+Utility/authority view of whole grid
+Monitoring solar generation & consumption
+Settlement of trades
+Market rule updates
+
+9. Settings & Profile
+User profile (name, address, meter ID)
+Wallet settings (connect/disconnect wallet, keys)
+Language (EN ↔ BN toggle like you just did)
+Notifications preferences
