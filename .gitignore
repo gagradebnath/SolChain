@@ -48,6 +48,7 @@ ai-ml/models/*.h5
 ai-ml/data/processed/
 __pycache__/
 *.pyc
+.venv/
 
 # Testing
 coverage/
