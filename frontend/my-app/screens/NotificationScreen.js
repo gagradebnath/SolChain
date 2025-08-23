@@ -7,7 +7,10 @@
  * @author Team GreyDevs
  */
 
-import React, { useState } from 'react';
+import React, { useState , useEffect} from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import config from '../assets/config';
+import { SafeAreaView } from 'react-native';
 import { View, Text, FlatList, TouchableOpacity } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Feather } from '@expo/vector-icons';
@@ -15,57 +18,6 @@ import UniversalSafeArea from '../components/UniversalSafeArea';
 import UniversalScrollContainer from '../components/UniversalScrollContainer';
 import styles from '../styles/NotificationStyles'; // Ensure you have this file
 
-// --- DUMMY DATA (from backend) ---
-const DUMMY_NOTIFICATIONS = [
-    {
-        id: '1',
-        title: 'New Trade Alert!',
-        message: 'You have a new energy trade request from Aarav Chowdhury.',
-        type: 'trade',
-        timestamp: '2m ago',
-        isRead: false,
-    },
-    {
-        id: '2',
-        title: 'Transaction Confirmed',
-        message: 'Your sale of 2.5 kWh to Fahim H. was successful. +0.5 SOL added to your wallet.',
-        type: 'transaction',
-        timestamp: '15m ago',
-        isRead: false,
-    },
-    {
-        id: '3',
-        title: 'Community News',
-        message: 'A new policy on energy trading was just announced.',
-        type: 'news',
-        timestamp: '1h ago',
-        isRead: false,
-    },
-    {
-        id: '4',
-        title: 'Network Update',
-        message: 'Your solar generation data for August 2025 has been successfully synced.',
-        type: 'update',
-        timestamp: '3h ago',
-        isRead: true,
-    },
-    {
-        id: '5',
-        title: 'Trade Completed',
-        message: 'Your purchase of 1.2 kWh from Bina A. is now complete.',
-        type: 'transaction',
-        timestamp: '1d ago',
-        isRead: true,
-    },
-    {
-        id: '6',
-        title: 'Welcome to SolChain!',
-        message: 'Your account has been successfully created. Explore the app to get started.',
-        type: 'info',
-        timestamp: '2d ago',
-        isRead: true,
-    },
-];
 
 // --- ICON MAPPING ---
 const getIconForType = (type) => {
@@ -100,9 +52,47 @@ const translations = {
 };
 
 export default function NotificationScreen() {
-    const [notifications, setNotifications] = useState(DUMMY_NOTIFICATIONS);
     const [language, setLanguage] = useState("en");
     const t = translations[language];
+    const [notifications, setNotifications] = useState(null);
+    const [isLoaded, setIsLoaded] = useState(false);
+
+
+    useEffect(() => {
+        fetchNotifications();
+    }, []);
+
+    async function fetchNotifications() {
+        try {
+            const token = await AsyncStorage.getItem('token');
+            const response = await fetch(`${config.API_BASE_URL}/notifications`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to fetch notifications');
+            }
+
+            setNotifications(data.data);
+            setIsLoaded(data.success);
+        } catch (err) {
+            console.error("Error fetching notifications:", err);
+            Alert.alert("Error", "Failed to fetch notifications. Check your network connection.");
+        }
+    }
+
+    if (!isLoaded) {
+        return (
+            <SafeAreaView style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+                <Text>Loading notifications...</Text>
+            </SafeAreaView>
+        );
+    }
+
 
     const unreadNotifications = notifications.filter(n => !n.isRead);
     const readNotifications = notifications.filter(n => n.isRead);
