@@ -103,12 +103,7 @@ export default function GamificationScreen() {
             >
                 {/* Goals Section */}
                 <Text style={styles.sectionTitle}>{t.goals}</Text>
-                <FlatList
-                    data={DUMMY_GOALS}
-                    renderItem={renderGoalItem}
-                    keyExtractor={item => item.id}
-                    scrollEnabled={false}
-                />
+                {DUMMY_GOALS.map((item) => renderGoalItem({ item }))}
 
                 {/* Badges Section */}
                 <Text style={styles.sectionTitle}>{t.badges}</Text>
@@ -124,12 +119,7 @@ export default function GamificationScreen() {
                 {/* Leaderboard Section */}
                 <Text style={styles.sectionTitle}>{t.leaderboard}</Text>
                 <View style={[styles.leaderboardCard, styles.cardShadow]}>
-                    <FlatList
-                        data={DUMMY_LEADERBOARD}
-                        renderItem={renderLeaderboardItem}
-                        keyExtractor={item => item.id}
-                        scrollEnabled={false}
-                    />
+                    {DUMMY_LEADERBOARD.map((item) => renderLeaderboardItem({ item }))}
                 </View>
             </UniversalScrollContainer>
         </UniversalSafeArea>

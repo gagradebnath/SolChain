@@ -7,7 +7,7 @@
  */
 
 import React, { useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Feather } from '@expo/vector-icons';
 import UniversalSafeArea from '../components/UniversalSafeArea';
@@ -104,7 +104,7 @@ const getIconForType = (type) => {
         case 'buy': return 'arrow-down-left';
         case 'sell': return 'arrow-up-right';
         case 'staking': return 'zap';
-        case 'carbon_credit': return 'leaf';
+        case 'carbon_credit': return 'award'; // Changed from 'leaf' to 'award'
         default: return 'info';
     }
 };
@@ -125,24 +125,6 @@ const getTxColor = (type) => {
 export default function WalletScreen() {
     const [language, setLanguage] = useState("en");
     const t = translations[language];
-
-    const renderTransactionItem = ({ item }) => (
-        <View style={styles.transactionCard}>
-            <Feather
-                name={getIconForType(item.type)}
-                size={24}
-                color={getTxColor(item.type)}
-            />
-            <View style={styles.transactionDetails}>
-                <Text style={styles.transactionDescription}>{item.description}</Text>
-                <Text style={styles.transactionAmount}>{item.amount}</Text>
-            </View>
-            <View style={styles.transactionValueContainer}>
-                <Text style={[styles.transactionValue, { color: getTxColor(item.type) }]}>{item.value}</Text>
-                <Text style={styles.transactionTimestamp}>{item.timestamp}</Text>
-            </View>
-        </View>
-    );
 
     const ActionButton = ({ icon, text, onPress }) => (
         <TouchableOpacity style={styles.actionButton} onPress={onPress}>
@@ -199,12 +181,23 @@ export default function WalletScreen() {
 
                 {/* TransactionHistory */}
                 <Text style={styles.sectionTitle}>{t.transactions}</Text>
-                <FlatList
-                    data={DUMMY_TRANSACTIONS}
-                    renderItem={renderTransactionItem}
-                    keyExtractor={item => item.id}
-                    scrollEnabled={false}
-                />
+                {DUMMY_TRANSACTIONS.map((item) => (
+                    <View key={item.id} style={styles.transactionCard}>
+                        <Feather
+                            name={getIconForType(item.type)}
+                            size={24}
+                            color={getTxColor(item.type)}
+                        />
+                        <View style={styles.transactionDetails}>
+                            <Text style={styles.transactionDescription}>{item.description}</Text>
+                            <Text style={styles.transactionAmount}>{item.amount}</Text>
+                        </View>
+                        <View style={styles.transactionValueContainer}>
+                            <Text style={[styles.transactionValue, { color: getTxColor(item.type) }]}>{item.value}</Text>
+                            <Text style={styles.transactionTimestamp}>{item.timestamp}</Text>
+                        </View>
+                    </View>
+                ))}
 
                 {/* Additional Functions as a separate settings section */}
                 <Text style={styles.sectionTitle}>More Options</Text>

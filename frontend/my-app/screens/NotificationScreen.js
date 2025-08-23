@@ -165,6 +165,7 @@ export default function NotificationScreen() {
                             renderItem={renderNotificationItem}
                             keyExtractor={item => item.id}
                             showsVerticalScrollIndicator={false}
+                            scrollEnabled={false}
                         />
                     </View>
                 )}
@@ -177,6 +178,7 @@ export default function NotificationScreen() {
                             renderItem={renderNotificationItem}
                             keyExtractor={item => item.id}
                             showsVerticalScrollIndicator={false}
+                            scrollEnabled={false}
                         />
                     </View>
                 )}

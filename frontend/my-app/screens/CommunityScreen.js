@@ -8,7 +8,7 @@
  */
 
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, TouchableOpacity, FlatList, Image, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, Image, Platform } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Feather } from '@expo/vector-icons';
 import UniversalSafeArea from '../components/UniversalSafeArea';
@@ -210,7 +210,7 @@ export default function CommunityScreen() {
         <Feather name="chevron-right" size={24} color="#fff" />
       </TouchableOpacity>
       <Text style={styles.listHeader}>{t.nearby}</Text>
-      <FlatList data={DUMMY_USERS} renderItem={renderUserCard} keyExtractor={item => item.id} scrollEnabled={false} />
+      {DUMMY_USERS.map((item) => renderUserCard({ item }))}
     </>
   );
 

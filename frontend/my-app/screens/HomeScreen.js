@@ -221,12 +221,7 @@ export default function HomeScreen() {
                     <Text style={styles.sectionTitle}>{translations[language].myGoals}</Text>
                     <Text style={styles.viewAllText}>{translations[language].viewAll} →</Text>
                 </TouchableOpacity>
-                <FlatList
-                    data={DUMMY_DATA.goals}
-                    renderItem={renderGoalItem}
-                    keyExtractor={(item) => item.id}
-                    scrollEnabled={false}
-                />
+                {DUMMY_DATA.goals.map((item) => renderGoalItem({ item }))}
             </View>
         );
     };

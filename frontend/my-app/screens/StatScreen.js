@@ -234,13 +234,9 @@ export default function StatScreen() {
                 {/* Recent Transactions Section */}
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>{t.recentTransactions}</Text>
-                    <FlatList
-                        data={DUMMY_STATS.recentTransactions}
-                        renderItem={renderTransactionItem}
-                        keyExtractor={item => item.id}
-                        scrollEnabled={false}
-                        contentContainerStyle={styles.transactionList}
-                    />
+                    <View style={styles.transactionList}>
+                        {DUMMY_STATS.recentTransactions.map((item) => renderTransactionItem({ item }))}
+                    </View>
                 </View>
 
             </UniversalScrollContainer>
