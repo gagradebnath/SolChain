@@ -7,7 +7,10 @@
  * @author Team GreyDevs
  */
 
-import React, { useState } from 'react';
+import React, { useState , useEffect} from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import config from '../assets/config';
+import { SafeAreaView } from 'react-native';
 import { View, Text, TouchableOpacity, Alert, Switch } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Feather } from '@expo/vector-icons';
@@ -15,15 +18,7 @@ import UniversalSafeArea from '../components/UniversalSafeArea';
 import UniversalScrollContainer from '../components/UniversalScrollContainer';
 import styles from '../styles/SettingsStyles.js';
 
-// Dummy user data
-const USER_PROFILE = {
-  name: 'John Doe',
-  address: '123 Smart Grid St, EcoCity',
-  meterId: 'EM-4573-A8',
-  walletAddress: '0x1234...ef67',
-};
 
-// Translations
 const translations = {
   en: {
     settings: "Settings",
@@ -68,6 +63,43 @@ export default function SettingsScreen() {
   const [pushEnabled, setPushEnabled] = useState(true);
   const [newsEnabled, setNewsEnabled] = useState(true);
   const [transactionsEnabled, setTransactionsEnabled] = useState(false);
+  const [USER_PROFILE, setUSER_PROFILE] = useState([]);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    async function fetchData() {
+        try {
+            const token = await AsyncStorage.getItem('token');
+            const response = await fetch(`${config.API_BASE_URL}/settings`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to fetch notifications');
+            }
+
+            setUSER_PROFILE(data.userProfile);
+            setIsLoaded(data.success);
+        } catch (err) {
+            console.error("Error fetching settings:", err);
+            Alert.alert("Error", "Failed to fetch settings. Check your network connection.");
+        }
+    }
+
+    if (!isLoaded) {
+        return (
+            <SafeAreaView style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+                <Text>Loading settings...</Text>
+            </SafeAreaView>
+        );
+    }
 
   const handleDisconnectWallet = () => {
     Alert.alert(

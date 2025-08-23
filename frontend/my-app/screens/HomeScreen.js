@@ -16,41 +16,16 @@
  * @author Team GreyDevs
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, FlatList, StyleSheet, Platform, RefreshControl } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Feather } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import UniversalSafeArea from '../components/UniversalSafeArea';
+import { SafeAreaView } from 'react-native';
 import UniversalScrollContainer from '../components/UniversalScrollContainer';
-
-// Dummy data for all components
-const DUMMY_DATA = {
-    energyOverview: {
-        production: '5.2 kWh',
-        consumption: '3.1 kWh',
-        savings: '৳15.75',
-    },
-    recentActivity: [
-        { id: '1', type: 'transaction', description: 'Sold 0.5 kWh to Grid', timestamp: '10:30 AM', value: '+0.5 SOL' },
-        { id: '2', type: 'transaction', description: 'Bought 0.2 kWh from User B', timestamp: '09:45 AM', value: '-0.2 SOL' },
-        { id: '3', type: 'notification', description: 'System maintenance scheduled', timestamp: '08:00 AM', value: null },
-    ],
-    weather: {
-        location: 'Dhaka, Bangladesh',
-        condition: 'Partly Cloudy',
-        temperature: '32°C',
-        icon: 'cloud',
-    },
-    marketPrices: {
-        buy: '0.25 SOL/kWh',
-        sell: '0.20 SOL/kWh',
-    },
-    goals: [
-        { id: '1', title: 'Reduce Consumption', target: '20%', progress: 65 },
-        { id: '2', title: 'Earn SOL', target: '100 SOL', progress: 40 },
-    ],
-};
+import config from '../assets/config';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Translations
 const translations = {
@@ -97,6 +72,7 @@ const translations = {
 // Main screen component
 export default function HomeScreen() {
     const [language, setLanguage] = useState("en");
+    const [homeData, setHomeData] = useState(null);
     const [refreshing, setRefreshing] = useState(false);
     const navigation = useNavigation();
 
@@ -107,6 +83,36 @@ export default function HomeScreen() {
             setRefreshing(false);
         }, 1000);
     };
+    useEffect(() => {
+        fetchHomeData();
+    }, []);
+
+    async function fetchHomeData() {
+        try {
+            const token = await AsyncStorage.getItem('token');
+            const response = await fetch(`${config.API_BASE_URL}/homescreen`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+            const data = await response.json();
+            setHomeData(data);
+        } catch (err) {
+            console.error("Error fetching home data:", err);
+        }
+    }
+
+    if (!homeData) {
+        return (
+            <SafeAreaView style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+                <Text>Loading home data...</Text>
+            </SafeAreaView>
+        );
+    }
+
+    
 
     const navigateToSection = (section) => {
         navigation.navigate(section);
@@ -143,7 +149,7 @@ export default function HomeScreen() {
                 <Text style={styles.viewAllText}>{translations[language].viewAll} →</Text>
             </TouchableOpacity>
             <View style={styles.energyCardContainer}>
-                {Object.entries(DUMMY_DATA.energyOverview).map(([key, value]) => (
+                {Object.entries(homeData.energyOverview).map(([key, value]) => (
                     <View key={key} style={[styles.energyCard, styles.cardShadow]}>
                         <Feather
                             name={key === 'production' ? 'sunrise' : key === 'consumption' ? 'zap' : 'trending-up'}
@@ -165,7 +171,7 @@ export default function HomeScreen() {
                 <Text style={styles.viewAllText}>{translations[language].viewAll} →</Text>
             </TouchableOpacity>
 
-            {DUMMY_DATA.recentActivity.slice(0, 3).map((item) => (
+            {homeData.recentActivity.slice(0, 3).map((item) => (
                 <View key={item.id} style={styles.activityItem}>
                     <Feather name={item.type === 'transaction' ? 'repeat' : 'info'} size={20} color="#666" />
                     <View style={styles.activityTextContainer}>
@@ -185,20 +191,20 @@ export default function HomeScreen() {
     const renderWeatherAndMarket = () => (
         <View style={styles.twoColumnContainer}>
             <View style={[styles.weatherCard, styles.cardShadow]}>
-                <Feather name={DUMMY_DATA.weather.icon} size={30} color="#2196F3" />
-                <Text style={styles.weatherTemp}>{DUMMY_DATA.weather.temperature}</Text>
-                <Text style={styles.weatherCondition}>{DUMMY_DATA.weather.condition}</Text>
-                <Text style={styles.weatherLocation}>{DUMMY_DATA.weather.location}</Text>
+                <Feather name={homeData.weather.icon} size={30} color="#2196F3" />
+                <Text style={styles.weatherTemp}>{homeData.weather.temperature}</Text>
+                <Text style={styles.weatherCondition}>{homeData.weather.condition}</Text>
+                <Text style={styles.weatherLocation}>{homeData.weather.location}</Text>
             </View>
             <View style={[styles.marketCard, styles.cardShadow]}>
                 <Text style={styles.marketTitle}>{translations[language].marketPrice}</Text>
                 <View style={styles.marketRow}>
                     <Text style={styles.marketLabel}>{translations[language].buyPrice}</Text>
-                    <Text style={styles.marketValue}>{DUMMY_DATA.marketPrices.buy}</Text>
+                    <Text style={styles.marketValue}>{homeData.marketPrices.buy}</Text>
                 </View>
                 <View style={styles.marketRow}>
                     <Text style={styles.marketLabel}>{translations[language].sellPrice}</Text>
-                    <Text style={styles.marketValue}>{DUMMY_DATA.marketPrices.sell}</Text>
+                    <Text style={styles.marketValue}>{homeData.marketPrices.sell}</Text>
                 </View>
             </View>
         </View>
@@ -222,7 +228,7 @@ export default function HomeScreen() {
                     <Text style={styles.viewAllText}>{translations[language].viewAll} →</Text>
                 </TouchableOpacity>
                 <FlatList
-                    data={DUMMY_DATA.goals}
+                    data={homeData.goals}
                     renderItem={renderGoalItem}
                     keyExtractor={(item) => item.id}
                     scrollEnabled={false}

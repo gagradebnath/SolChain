@@ -8,7 +8,10 @@
  * @author Team GreyDevs
  */
 
-import React, { useState } from 'react';
+import React, { useState , useEffect} from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import config from '../assets/config';
+import { SafeAreaView } from 'react-native';
 import { View, Text, TouchableOpacity, FlatList, Dimensions } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Feather } from '@expo/vector-icons';
@@ -27,58 +30,7 @@ const chartConfig = {
     useShadowColorFromDataset: false,
 };
 
-// --- DUMMY DATA (from backend) ---
-const DUMMY_STATS = {
-    overview: {
-        totalSavings: '12.50 SOL',
-        energySaved: '55 kWh',
-        carbonOffset: '25 kg CO2',
-    },
-    daily: {
-        currentUsage: '2.5 kWh',
-        solarGeneration: '4.8 kWh',
-        netFlow: '+2.3 kWh (Exporting)',
-    },
-    trading: {
-        totalTrades: 15,
-        energyTraded: '32 kWh',
-        p2pEarnings: '+7.20 SOL',
-    },
-    recentTransactions: [
-        { id: '1', type: 'sell', amount: '1.2 kWh', value: '+0.25 SOL', peer: 'Aarav C.', date: 'Aug 21' },
-        { id: '2', type: 'buy', amount: '0.8 kWh', value: '-0.18 SOL', peer: 'Bina A.', date: 'Aug 20' },
-        { id: '3', type: 'sell', amount: '2.1 kWh', value: '+0.45 SOL', peer: 'Fahim H.', date: 'Aug 19' },
-    ],
-    // Dummy data for charts
-    usageGenerationData: {
-        labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-        datasets: [
-            {
-                data: [4.5, 5.2, 4.8, 6.1, 5.5, 6.8, 7.5], // Usage in kWh
-                color: (opacity = 1) => `rgba(255, 99, 132, ${opacity})`,
-                strokeWidth: 2,
-            },
-            {
-                data: [3.2, 4.1, 4.9, 5.5, 4.8, 6.2, 7.1], // Generation in kWh
-                color: (opacity = 1) => `rgba(54, 162, 235, ${opacity})`,
-                strokeWidth: 2,
-            },
-        ],
-        legend: ["Usage", "Generation"]
-    },
-    tradingBreakdownData: [
-        { name: "Sold", population: 22, color: "#4CAF50", legendFontColor: "#7F7F7F", legendFontSize: 15 },
-        { name: "Bought", population: 10, color: "#F44336", legendFontColor: "#7F7F7F", legendFontSize: 15 },
-    ],
-    savingsEarningsData: {
-        labels: ["W1", "W2", "W3", "W4"],
-        datasets: [
-            {
-                data: [3.2, 4.5, 2.1, 2.7], // P2P Earnings in SOL
-            },
-        ],
-    }
-};
+
 
 // --- TRANSLATIONS ---
 const translations = {
@@ -135,6 +87,44 @@ const translations = {
 export default function StatScreen() {
     const [language, setLanguage] = useState("en");
     const t = translations[language];
+    const [DATA_STATS, setDataStats] = useState(null);
+    const [isLoaded, setIsLoaded] = useState(false);
+
+
+    useEffect(() => {
+        fetchStatsData();
+    }, []);
+
+    async function fetchStatsData() {
+        try {
+            const token = await AsyncStorage.getItem('token');
+            const response = await fetch(`${config.API_BASE_URL}/stats`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to fetch stats data');
+            }
+
+            setDataStats(data.data);
+
+        } catch (err) {
+            console.error("Error fetching stats data:", err);
+            Alert.alert("Error", "Failed to fetch stats data. Check your network connection.");
+        }
+    }
+
+    if (!DATA_STATS) {
+        return (
+            <SafeAreaView style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+                <Text>Loading stats data...</Text>
+            </SafeAreaView>
+        );
+    }
 
     const renderStatCard = (label, value, iconName) => (
         <View style={styles.statCard}>
@@ -172,9 +162,9 @@ export default function StatScreen() {
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>{t.overview}</Text>
                     <View style={styles.cardContainer}>
-                        {renderStatCard(t.totalSavings, DUMMY_STATS.overview.totalSavings, 'trending-up')}
-                        {renderStatCard(t.energySaved, DUMMY_STATS.overview.energySaved, 'zap')}
-                        {renderStatCard(t.carbonOffset, DUMMY_STATS.overview.carbonOffset, 'cloud')}
+                        {renderStatCard(t.totalSavings, DATA_STATS.overview.totalSavings, 'trending-up')}
+                        {renderStatCard(t.energySaved, DATA_STATS.overview.energySaved, 'zap')}
+                        {renderStatCard(t.carbonOffset, DATA_STATS.overview.carbonOffset, 'cloud')}
                     </View>
                 </View>
 
@@ -182,7 +172,7 @@ export default function StatScreen() {
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>{t.usageGenerationChart}</Text>
                     <LineChart
-                        data={DUMMY_STATS.usageGenerationData}
+                        data={DATA_STATS.usageGenerationData}
                         width={width - 30}
                         height={220}
                         chartConfig={chartConfig}
@@ -195,7 +185,7 @@ export default function StatScreen() {
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>{t.tradingBreakdown}</Text>
                     <PieChart
-                        data={DUMMY_STATS.tradingBreakdownData}
+                        data={DATA_STATS.tradingBreakdownData}
                         width={width - 30}
                         height={200}
                         chartConfig={chartConfig}
@@ -211,7 +201,7 @@ export default function StatScreen() {
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>{t.p2pEarningsChart}</Text>
                     <BarChart
-                        data={DUMMY_STATS.savingsEarningsData}
+                        data={DATA_STATS.savingsEarningsData}
                         width={width - 30}
                         height={220}
                         yAxisLabel="$"
@@ -225,9 +215,9 @@ export default function StatScreen() {
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>{t.p2pStats}</Text>
                     <View style={styles.cardContainer}>
-                        {renderStatCard(t.totalTrades, DUMMY_STATS.trading.totalTrades, 'refresh-ccw')}
-                        {renderStatCard(t.energyTraded, DUMMY_STATS.trading.energyTraded, 'activity')}
-                        {renderStatCard(t.p2pEarnings, DUMMY_STATS.trading.p2pEarnings, 'dollar-sign')}
+                        {renderStatCard(t.totalTrades, DATA_STATS.trading.totalTrades, 'refresh-ccw')}
+                        {renderStatCard(t.energyTraded, DATA_STATS.trading.energyTraded, 'activity')}
+                        {renderStatCard(t.p2pEarnings, DATA_STATS.trading.p2pEarnings, 'dollar-sign')}
                     </View>
                 </View>
 
@@ -235,7 +225,7 @@ export default function StatScreen() {
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>{t.recentTransactions}</Text>
                     <FlatList
-                        data={DUMMY_STATS.recentTransactions}
+                        data={DATA_STATS.recentTransactions}
                         renderItem={renderTransactionItem}
                         keyExtractor={item => item.id}
                         scrollEnabled={false}
