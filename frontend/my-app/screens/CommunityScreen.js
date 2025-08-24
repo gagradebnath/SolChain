@@ -8,55 +8,39 @@
  */
 
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Image, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, FlatList, Image, Platform, ScrollView } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Feather } from '@expo/vector-icons';
 import UniversalSafeArea from '../components/UniversalSafeArea';
 import UniversalScrollContainer from '../components/UniversalScrollContainer';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import styles from '../styles/CommunityStyles';
+import config from '../assets/config';
 
 let MapViewComponent = null;
 let MarkerComponent = null;
 let CalloutComponent = null;
+let PROVIDER_GOOGLE = null;
 
-// --- DUMMY DATA with Coordinates ---
-const DUMMY_USERS = [
-  { id: '1', name: 'Aarav Chowdhury', distance: '0.5 km away', status: 'Selling', rate: '0.22 SOL/kWh', trustScore: 95, avatar: 'https://i.pravatar.cc/150?u=aaron', coordinate: { latitude: 23.8153, longitude: 90.4105 } },
-  { id: '2', name: 'Bina Akter', distance: '0.8 km away', status: 'Buying', rate: '0.24 SOL/kWh', trustScore: 88, avatar: 'https://i.pravatar.cc/150?u=bina', coordinate: { latitude: 23.8053, longitude: 90.4155 } },
-  { id: '3', name: 'Fahim Hasan', distance: '1.2 km away', status: 'Selling', rate: '0.21 SOL/kWh', trustScore: 98, avatar: 'https://i.pravatar.cc/150?u=fahim', coordinate: { latitude: 23.8103, longitude: 90.4225 } },
-];
 
-const DUMMY_TRADE_HISTORY = {
-  '1': [
-    { id: 't1', type: 'buy', amount: '2.5 kWh', value: '-0.55 SOL', date: '2025-08-20' },
-    { id: 't2', type: 'sell', amount: '5.0 kWh', value: '+1.10 SOL', date: '2025-08-18' },
-  ],
-  '3': [
-    { id: 't3', type: 'sell', amount: '3.0 kWh', value: '+0.63 SOL', date: '2025-08-21' },
-  ]
-};
-
-// --- TRANSLATIONS ---
 const translations = {
   en: { title: "Community Network", nearby: "Nearby Users", history: "Trade History", mapView: "Switch to Map View", listView: "Switch to List View", selling: "Selling", buying: "Buying", rate: "Rate", trust: "Trust", trade: "Trade", noHistory: "No trade history with this user yet.", back: "Back to Users", myLocation: "You (My Location)" },
   bn: { title: "কমিউনিটি নেটওয়ার্ক", nearby: "কাছাকাছি ব্যবহারকারী", history: "ট্রেড ইতিহাস", mapView: "ম্যাপ ভিউতে যান", listView: "তালিকা ভিউতে যান", selling: "বিক্রি হচ্ছে", buying: "কেনা হচ্ছে", rate: "দর", trust: "বিশ্বাস", trade: "ট্রেড", noHistory: "এই ব্যবহারকারীর সাথে এখনো কোনো ট্রেড ইতিহাস নেই।", back: "ব্যবহারকারীদের কাছে ফিরে যান", myLocation: "আপনি (আমার অবস্থান)" }
 };
 
-// --- DUMMY USER LOCATION ---
-const MY_LOCATION = { latitude: 23.8103, longitude: 90.4125 };
+
 
 export default function CommunityScreen() {
   const [language, setLanguage] = useState("en");
   const [selectedUser, setSelectedUser] = useState(null);
   const [isMapView, setIsMapView] = useState(false);
-  const t = translations[language];
-
-  const scrollViewRef = useRef();
-  
-  // New state to manage map component loading
   const [mapLoaded, setMapLoaded] = useState(false);
+  const t = translations[language];
+  const scrollViewRef = useRef();
+  const [users, setUsers] = useState([]);
+  const [tradeHistory, setTradeHistory] = useState({});
+  const [MY_LOCATION, setMyLocation] = useState(null);
 
-  // Use useEffect to load the map components dynamically
   useEffect(() => {
     async function loadMaps() {
       if (Platform.OS !== 'web') {
@@ -65,6 +49,7 @@ export default function CommunityScreen() {
           MapViewComponent = maps.default;
           MarkerComponent = maps.Marker;
           CalloutComponent = maps.Callout;
+          PROVIDER_GOOGLE = maps.PROVIDER_GOOGLE;
           setMapLoaded(true);
         } catch (error) {
           console.warn("react-native-maps failed to load", error);
@@ -74,13 +59,37 @@ export default function CommunityScreen() {
     loadMaps();
   }, []);
 
+  useEffect(() => {
+    async function fetchCommunityData() {
+      try {
+        const token = await AsyncStorage.getItem("token");
+        const res = await fetch(`${config.API_BASE_URL}/community`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+        const data = await res.json();
+        if (data.success) {
+          setUsers(data.users);
+          setTradeHistory(data.tradeHistory);
+          setMyLocation(data.myLocation);
+        }
+      } catch (error) {
+        console.warn("Failed to fetch community data:", error);
+      }
+    }
+    fetchCommunityData();
+  }, []);
+
   const handleSelectUser = (user) => {
     setSelectedUser(user);
     if (scrollViewRef.current) {
       setTimeout(() => { scrollViewRef.current.scrollToEnd({ animated: true }); }, 100);
     }
   };
-  
+
   const handleBack = () => setSelectedUser(null);
 
   const renderSelectedUserInfo = () => {
@@ -109,10 +118,9 @@ export default function CommunityScreen() {
             <TouchableOpacity style={styles.tradeButton}><Text style={styles.tradeButtonText}>{t.trade}</Text></TouchableOpacity>
           </View>
         </View>
-
         <Text style={styles.historyTitle}>{t.history}</Text>
-        {DUMMY_TRADE_HISTORY[selectedUser.id]?.length > 0 ? (
-          DUMMY_TRADE_HISTORY[selectedUser.id].map(trade => (
+        {tradeHistory[selectedUser.id]?.length > 0 ? (
+          tradeHistory[selectedUser.id].map(trade => (
             <View key={trade.id} style={[styles.card, styles.cardShadow, styles.historyCard]}>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Feather name={trade.type === 'buy' ? 'arrow-down-left' : 'arrow-up-right'} size={24} color={trade.type === 'buy' ? '#F44336' : '#4CAF50'} />
@@ -150,53 +158,34 @@ export default function CommunityScreen() {
   );
 
   const renderMapView = () => {
-    if (!mapLoaded) {
-      return (
-        <View style={[styles.mapContainer, { justifyContent: 'center', alignItems: 'center' }]}>
-          <Text>Loading map...</Text>
-        </View>
-      );
+    if (!mapLoaded || !MapViewComponent || !MarkerComponent || !CalloutComponent) {
+      return <View style={[styles.mapContainer, { justifyContent: 'center', alignItems: 'center' }]}><Text>Loading map...</Text></View>;
     }
-    
+
     return (
       <View style={styles.mapContainer}>
         <MapViewComponent
           style={styles.map}
-          initialRegion={{
-            latitude: MY_LOCATION.latitude,
-            longitude: MY_LOCATION.longitude,
-            latitudeDelta: 0.05,
-            longitudeDelta: 0.05,
-          }}
+          provider={PROVIDER_GOOGLE}
+          initialRegion={{ latitude: MY_LOCATION.latitude, longitude: MY_LOCATION.longitude, latitudeDelta: 0.05, longitudeDelta: 0.05 }}
         >
           <MarkerComponent coordinate={MY_LOCATION}>
-            <Image
-              source={{ uri: 'https://i.pravatar.cc/150?u=myself' }}
-              style={{ width: 40, height: 40, borderRadius: 20, borderWidth: 2, borderColor: '#007AFF' }}
-            />
+            <Image source={{ uri: 'https://i.pravatar.cc/150?u=myself' }} style={{ width: 40, height: 40, borderRadius: 20, borderWidth: 2, borderColor: '#007AFF' }} />
             <CalloutComponent>
               <View style={[styles.calloutContainer, styles.cardShadow]}>
-                <Text style={styles.calloutName}>{translations[language].myLocation}</Text>
+                <Text style={styles.calloutName}>{t.myLocation}</Text>
               </View>
             </CalloutComponent>
           </MarkerComponent>
-
-          {DUMMY_USERS.map(user => (
-            <MarkerComponent
-              key={user.id}
-              coordinate={user.coordinate}
-              onPress={() => handleSelectUser(user)}
-            >
-              <Image
-                source={{ uri: user.avatar }}
-                style={{ width: 40, height: 40, borderRadius: 20, borderWidth: 2, borderColor: user.status === 'Selling' ? 'green' : 'red' }}
-              />
+          {users.map(user => (
+            <MarkerComponent key={user.id} coordinate={user.coordinate} onPress={() => handleSelectUser(user)}>
+              <Image source={{ uri: user.avatar }} style={{ width: 40, height: 40, borderRadius: 20, borderWidth: 2, borderColor: user.status === 'Selling' ? 'green' : 'red' }} />
             </MarkerComponent>
           ))}
         </MapViewComponent>
         <TouchableOpacity style={styles.toggleButton} onPress={() => setIsMapView(false)}>
           <Feather name="list" size={20} color="#333" />
-          <Text style={styles.toggleButtonText}>{translations[language].listView}</Text>
+          <Text style={styles.toggleButtonText}>{t.listView}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -210,7 +199,7 @@ export default function CommunityScreen() {
         <Feather name="chevron-right" size={24} color="#fff" />
       </TouchableOpacity>
       <Text style={styles.listHeader}>{t.nearby}</Text>
-      {DUMMY_USERS.map((item) => renderUserCard({ item }))}
+      <FlatList data={users} renderItem={renderUserCard} keyExtractor={item => item.id} scrollEnabled={false} />
     </>
   );
 
@@ -223,15 +212,14 @@ export default function CommunityScreen() {
           <Text style={styles.langToggle}>{language === "en" ? "EN/BN" : "BN/EN"}</Text>
         </TouchableOpacity>
       </View>
-      <UniversalScrollContainer 
-        ref={scrollViewRef} 
-        style={styles.container} 
-        contentContainerStyle={{ paddingBottom: 30 }}
-        showsVerticalScrollIndicator={false} 
-        scrollEnabled={!isMapView || !!selectedUser}
-      >
-        {isMapView ? renderMapView() : renderListView()}
-        {isMapView && selectedUser && renderSelectedUserInfo()}
+      <UniversalScrollContainer ref={scrollViewRef} style={styles.container} contentContainerStyle={{ paddingBottom: 30 }} showsVerticalScrollIndicator={false} scrollEnabled={!isMapView || !!selectedUser}>
+        {selectedUser ? (
+          renderSelectedUserInfo()
+        ) : isMapView ? (
+          renderMapView()
+        ) : (
+          renderListView()
+        )}
       </UniversalScrollContainer>
     </UniversalSafeArea>
   );

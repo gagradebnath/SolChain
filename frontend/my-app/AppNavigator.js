@@ -24,12 +24,13 @@ export default function AppNavigator() {
         {/* The main dashboard screen */}
         <Stack.Screen 
           name="Home" 
-          component={HomeScreen} 
+          component={AuthScreen} 
           options={{ headerShown: false }} // Hide the default header for the home screen
         />
 
         {/* Other screens */}
         <Stack.Screen name="Auth" component={AuthScreen} />
+        <Stack.Screen name="HomeScreen" component={HomeScreen} options={{ title: 'Home' }} />
         <Stack.Screen name="Wallet" component={WalletScreen} options={{ title: 'My Wallet' }} />
         <Stack.Screen name="Stats" component={StatsScreen} options={{ title: 'Statistics & Reports' }} />
         <Stack.Screen name="Community" component={CommunityScreen} />

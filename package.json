@@ -40,8 +40,6 @@
     "prettier": "^3.0.3"
   },
   "workspaces": [
-    "frontend",
-    "backend",
     "blockchain",
     "iot-simulator"
   ]

@@ -1,6 +1,9 @@
 
 
-import React, { useState } from 'react';
+import React, { useState , useEffect} from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import config from '../assets/config';
+import { SafeAreaView } from 'react-native';
 import { View, Text, FlatList, TouchableOpacity } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Feather } from '@expo/vector-icons';
@@ -9,25 +12,7 @@ import UniversalSafeArea from '../components/UniversalSafeArea';
 import UniversalScrollContainer from '../components/UniversalScrollContainer';
 import styles from '../styles/GamificationStyles';
 
-const DUMMY_GOALS = [
-    { id: '1', title: 'Monthly Savings Target', current: 150, target: 200, unit: 'SOL', color: '#4CAF50' },
-    { id: '2', title: 'Weekly Earnings Target', current: 80, target: 100, unit: 'SOL', color: '#007AFF' },
-    { id: '3', title: 'Carbon Offset Goal', current: 75, target: 100, unit: 'CC', color: '#9E9D24' },
-];
 
-const DUMMY_BADGES = [
-    { id: '1', name: 'Green Contributor', description: 'Offset 100 kg of carbon.', icon: 'gift' },
-    { id: '2', name: 'Top Seller', description: 'Sold over 500 kWh of energy.', icon: 'award' },
-    { id: '3', name: 'First Trade', description: 'Completed your first peer-to-peer trade.', icon: 'zap' },
-];
-
-const DUMMY_LEADERBOARD = [
-    { id: '1', name: 'You', rank: 1, points: 520, isUser: true },
-    { id: '2', name: 'Aarav Chowdhury', rank: 2, points: 480 },
-    { id: '3', name: 'Bina Akter', rank: 3, points: 455 },
-    { id: '4', name: 'Fahim Hasan', rank: 4, points: 410 },
-    { id: '5', name: 'Rahim Khan', rank: 5, points: 390 },
-];
 
 // --- TRANSLATIONS ---
 const translations = {
@@ -52,6 +37,47 @@ const translations = {
 export default function GamificationScreen() {
     const [language, setLanguage] = useState("en");
     const t = translations[language];
+    const [BADGES, setBADGES] = useState([]);
+    const [LEADERBOARD, setLEADERBOARD] = useState([]);
+    const [GOALS, setGOALS] = useState([]);
+    const [isLoaded, setIsLoaded] = useState(false);
+
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    async function fetchData() {
+        try {
+            const token = await AsyncStorage.getItem('token');
+            const response = await fetch(`${config.API_BASE_URL}/goals`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to fetch notifications');
+            }
+
+            setGOALS(data.goals);
+            setBADGES(data.badges);
+            setLEADERBOARD(data.leaderboard);
+            setIsLoaded(data.success);
+        } catch (err) {
+            console.error("Error fetching goals:", err);
+            Alert.alert("Error", "Failed to fetch goals. Check your network connection.");
+        }
+    }
+
+    if (!isLoaded) {
+        return (
+            <SafeAreaView style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+                <Text>Loading goals...</Text>
+            </SafeAreaView>
+        );
+    }
 
     const renderGoalItem = ({ item }) => (
         <View style={[styles.goalCard, styles.cardShadow]}>
@@ -103,12 +129,17 @@ export default function GamificationScreen() {
             >
                 {/* Goals Section */}
                 <Text style={styles.sectionTitle}>{t.goals}</Text>
-                {DUMMY_GOALS.map((item) => renderGoalItem({ item }))}
+                <FlatList
+                    data={GOALS}
+                    renderItem={renderGoalItem}
+                    keyExtractor={item => item.id}
+                    scrollEnabled={false}
+                />
 
                 {/* Badges Section */}
                 <Text style={styles.sectionTitle}>{t.badges}</Text>
                 <FlatList
-                    data={DUMMY_BADGES}
+                    data={BADGES}
                     renderItem={renderBadgeItem}
                     keyExtractor={item => item.id}
                     horizontal
@@ -119,7 +150,12 @@ export default function GamificationScreen() {
                 {/* Leaderboard Section */}
                 <Text style={styles.sectionTitle}>{t.leaderboard}</Text>
                 <View style={[styles.leaderboardCard, styles.cardShadow]}>
-                    {DUMMY_LEADERBOARD.map((item) => renderLeaderboardItem({ item }))}
+                    <FlatList
+                        data={LEADERBOARD}
+                        renderItem={renderLeaderboardItem}
+                        keyExtractor={item => item.id}
+                        scrollEnabled={false}
+                    />
                 </View>
             </UniversalScrollContainer>
         </UniversalSafeArea>

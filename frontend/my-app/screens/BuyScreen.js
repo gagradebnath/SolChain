@@ -6,56 +6,17 @@
  * @author Team GreyDevs
  */
 
-import React, { useState } from 'react';
+import React, { useState , useEffect} from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import config from '../assets/config';
+import { SafeAreaView } from 'react-native';
 import { View, Text, TouchableOpacity, FlatList, Alert } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Feather } from '@expo/vector-icons';
 import UniversalSafeArea from '../components/UniversalSafeArea';
 import styles from '../styles/BuySellScreenStyles.js';
 
-// Dummy data for energy sellers
-const DUMMY_SELLERS = [
-  {
-    id: '1',
-    name: 'Peer-to-Peer Seller A',
-    rate: '0.25',
-    availableUnits: '15 kWh',
-    trustScore: '95%',
-    type: 'peer',
-  },
-  {
-    id: '2',
-    name: 'The Grid',
-    rate: '0.30',
-    availableUnits: '∞ kWh',
-    trustScore: '100%',
-    type: 'grid',
-  },
-  {
-    id: '3',
-    name: 'Peer-to-Peer Seller C',
-    rate: '0.26',
-    availableUnits: '8 kWh',
-    trustScore: '88%',
-    type: 'peer',
-  },
-  {
-    id: '4',
-    name: 'Peer-to-Peer Seller D',
-    rate: '0.24',
-    availableUnits: '12 kWh',
-    trustScore: '92%',
-    type: 'peer',
-  },
-  {
-    id: '5',
-    name: 'Peer-to-Peer Seller E',
-    rate: '0.27',
-    availableUnits: '6 kWh',
-    trustScore: '91%',
-    type: 'peer',
-  },
-];
+
 
 // Translations
 const translations = {
@@ -91,6 +52,45 @@ const translations = {
 
 export default function BuyEnergyScreen() {
   const [language, setLanguage] = useState("en");
+  const [sellers, setSeller] = useState(null);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+
+    useEffect(() => {
+        fetchSellers();
+    }, []);
+
+    async function fetchSellers() {
+        try {
+            const token = await AsyncStorage.getItem('token');
+            const response = await fetch(`${config.API_BASE_URL}/buy`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to fetch sellers');
+            }
+
+            setSeller(data.data);
+            setIsLoaded(data.success);
+        } catch (err) {
+            console.error("Error fetching sellers:", err);
+            Alert.alert("Error", "Failed to fetch sellers. Check your network connection.");
+        }
+    }
+
+    if (!isLoaded) {
+        return (
+            <SafeAreaView style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+                <Text>Loading sellers...</Text>
+            </SafeAreaView>
+        );
+    }
+
 
   const handleBuyEnergy = (seller) => {
     Alert.alert(
@@ -150,11 +150,11 @@ export default function BuyEnergyScreen() {
         </TouchableOpacity>
       </View>
       <FlatList
-        data={DUMMY_SELLERS}
+        data={sellers}
         renderItem={renderSellerList}
         keyExtractor={(item) => item.id}
         contentContainerStyle={[
-          DUMMY_SELLERS.length === 0 ? styles.emptyContainer : { paddingBottom: 20 }
+          sellers.length === 0 ? styles.emptyContainer : { paddingBottom: 20 }
         ]}
         ListEmptyComponent={() => (
           <View style={styles.emptyContainer}>

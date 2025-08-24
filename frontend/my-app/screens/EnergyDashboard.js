@@ -7,54 +7,17 @@
  * @author Team GreyDevs
  */
 
-import {React, useState } from 'react';
+import {React, useState , useEffect} from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import UniversalSafeArea from '../components/UniversalSafeArea';
+import { SafeAreaView } from 'react-native';
 import UniversalScrollContainer from '../components/UniversalScrollContainer';
-import styles from '../styles/EnergyDashboardStyles'; // Assuming styles are in a separate file
+import styles from '../styles/EnergyDashboardStyles'; 
+import config from '../assets/config'; 
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// --- DUMMY DATA (Simulating Backend Response) ---
-const DUMMY_DATA = {
-    realTimeMetrics: {
-        production: 1.8, // kW
-        consumption: 0.6, // kW
-        gridFeedIn: 1.2, // kW (positive = selling, negative = buying)
-        batteryCharge: 0.5, // kW (positive = charging, negative = discharging)
-    },
-    battery: {
-        level: 85, // percentage
-        status: 'Charging',
-        health: 98, // percentage
-        timeToFull: '1 hr 15 min',
-    },
-    grid: {
-        status: 'Connected - Selling',
-        voltage: 235.5, // V
-        frequency: 50.1, // Hz
-    },
-    weather: {
-        location: 'Dhaka',
-        temperature: '33°C',
-        condition: 'Sunny',
-        solarIrradiance: 950, // W/m²
-        prediction: 'High production expected until 4 PM.',
-    },
-    historical: {
-        today: [1.2, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 3.8, 3.2, 2.5, 1.8, 1.0], // Sample production data for 12 hours
-        week: [25, 28, 22, 30, 27, 29, 31], // Daily production for a week
-    },
-    carbonFootprint: {
-        savedToday: 2.5, // kg CO2
-        totalSaved: 150.2, // kg CO2
-        treesPlantedEquivalent: 7.5,
-    },
-    predictions: {
-        nextHourProduction: '2.1 kWh',
-        peakTime: '2:30 PM',
-    }
-};
 
 // --- TRANSLATIONS ---
 const translations = {
@@ -131,7 +94,44 @@ const translations = {
 export default function EnergyDashboardScreen() {
     const [language, setLanguage] = useState("en");
     const [timeframe, setTimeframe] = useState('today');
+    const [energyData, setEnergyData] = useState(null);
     const t = translations[language]; // Shortcut for translations
+
+
+    useEffect(() => {
+        fetchEnergyData();
+    }, []);
+
+    async function fetchEnergyData() {
+        try {
+            const token = await AsyncStorage.getItem('token');
+            const response = await fetch(`${config.API_BASE_URL}/energy`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to fetch energy data');
+            }
+
+            setEnergyData(data.data);
+
+        } catch (err) {
+            console.error("Error fetching energy data:", err);
+            Alert.alert("Error", "Failed to fetch energy data. Check your network connection.");
+        }
+    }
+
+    if (!energyData) {
+        return (
+            <SafeAreaView style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+                <Text>Loading energy data...</Text>
+            </SafeAreaView>
+        );
+    }
 
     // --- RENDER FUNCTIONS FOR EACH SECTION ---
 
@@ -191,10 +191,10 @@ export default function EnergyDashboardScreen() {
                 <View style={[styles.card, styles.cardShadow]}>
                     <Text style={styles.sectionTitle}>{t.realTime}</Text>
                     <View style={styles.metricsGrid}>
-                        {renderMetricCard("sunrise", t.production, DUMMY_DATA.realTimeMetrics.production, "kW", "#4CAF50")}
-                        {renderMetricCard("zap", t.consumption, DUMMY_DATA.realTimeMetrics.consumption, "kW", "#FFC107")}
-                        {renderMetricCard("chevrons-up", t.gridFeed, DUMMY_DATA.realTimeMetrics.gridFeedIn, "kW", "#2196F3")}
-                        {renderMetricCard("battery-charging", t.batteryCharge, DUMMY_DATA.realTimeMetrics.batteryCharge, "kW", "#9C27B0")}
+                        {renderMetricCard("sunrise", t.production, energyData.realTimeMetrics.production, "kW", "#4CAF50")}
+                        {renderMetricCard("zap", t.consumption, energyData.realTimeMetrics.consumption, "kW", "#FFC107")}
+                        {renderMetricCard("chevrons-up", t.gridFeed, energyData.realTimeMetrics.gridFeedIn, "kW", "#2196F3")}
+                        {renderMetricCard("battery-charging", t.batteryCharge, energyData.realTimeMetrics.batteryCharge, "kW", "#9C27B0")}
                     </View>
                 </View>
 
@@ -202,16 +202,16 @@ export default function EnergyDashboardScreen() {
                 <View style={styles.twoColumnContainer}>
                     <View style={[styles.card, styles.cardShadow, styles.columnCard]}>
                         <Text style={styles.sectionTitle}>{t.batteryStatus}</Text>
-                        <Text style={styles.batteryLevel}>{DUMMY_DATA.battery.level}%</Text>
-                        <Text style={styles.batteryStatusText}>{DUMMY_DATA.battery.status}</Text>
-                        <View style={styles.detailRow}><Text>{t.health}: {DUMMY_DATA.battery.health}%</Text></View>
-                        <View style={styles.detailRow}><Text>{t.timeToFull}: {DUMMY_DATA.battery.timeToFull}</Text></View>
+                        <Text style={styles.batteryLevel}>{energyData.battery.level}%</Text>
+                        <Text style={styles.batteryStatusText}>{energyData.battery.status}</Text>
+                        <View style={styles.detailRow}><Text>{t.health}: {energyData.battery.health}%</Text></View>
+                        <View style={styles.detailRow}><Text>{t.timeToFull}: {energyData.battery.timeToFull}</Text></View>
                     </View>
                     <View style={[styles.card, styles.cardShadow, styles.columnCard]}>
                         <Text style={styles.sectionTitle}>{t.gridStatus}</Text>
-                        <Text style={styles.gridStatusText}>{DUMMY_DATA.grid.status}</Text>
-                        <View style={styles.detailRow}><Text>{t.voltage}: {DUMMY_DATA.grid.voltage} V</Text></View>
-                        <View style={styles.detailRow}><Text>{t.frequency}: {DUMMY_DATA.grid.frequency} Hz</Text></View>
+                        <Text style={styles.gridStatusText}>{energyData.grid.status}</Text>
+                        <View style={styles.detailRow}><Text>{t.voltage}: {energyData.grid.voltage} V</Text></View>
+                        <View style={styles.detailRow}><Text>{t.frequency}: {energyData.grid.frequency} Hz</Text></View>
                     </View>
                 </View>
 
@@ -241,28 +241,28 @@ export default function EnergyDashboardScreen() {
                     <View style={styles.weatherInfo}>
                         <Feather name="sun" size={40} color="#FFC107" />
                         <View>
-                            <Text style={styles.weatherTemp}>{DUMMY_DATA.weather.temperature}</Text>
-                            <Text style={styles.weatherLocation}>{DUMMY_DATA.weather.location}</Text>
+                            <Text style={styles.weatherTemp}>{energyData.weather.temperature}</Text>
+                            <Text style={styles.weatherLocation}>{energyData.weather.location}</Text>
                         </View>
                     </View>
-                    <Text style={styles.weatherPrediction}>{DUMMY_DATA.weather.prediction}</Text>
+                    <Text style={styles.weatherPrediction}>{energyData.weather.prediction}</Text>
                 </View>
                 
                 {/* --- CARBON FOOTPRINT --- */}
                 <View style={[styles.card, styles.cardShadow]}>
                     <Text style={styles.sectionTitle}>{t.carbonFootprint}</Text>
                      <View style={styles.metricsGrid}>
-                        {renderMetricCard("activity", t.co2Saved, DUMMY_DATA.carbonFootprint.savedToday, "kg", "#4CAF50")}
-                        {renderMetricCard("bar-chart", t.totalSaved, DUMMY_DATA.carbonFootprint.totalSaved, "kg", "#2196F3")}
-                        {renderMetricCard("git-merge", t.equivalentTrees, DUMMY_DATA.carbonFootprint.treesPlantedEquivalent, "", "#9C27B0")}
+                        {renderMetricCard("activity", t.co2Saved, energyData.carbonFootprint.savedToday, "kg", "#4CAF50")}
+                        {renderMetricCard("bar-chart", t.totalSaved, energyData.carbonFootprint.totalSaved, "kg", "#2196F3")}
+                        {renderMetricCard("git-merge", t.equivalentTrees, energyData.carbonFootprint.treesPlantedEquivalent, "", "#9C27B0")}
                     </View>
                 </View>
 
                 {/* --- PREDICTIVE ANALYTICS --- */}
                 <View style={[styles.card, styles.cardShadow]}>
                     <Text style={styles.sectionTitle}>{t.predictions}</Text>
-                     <View style={styles.detailRow}><Text>{t.nextHour}: {DUMMY_DATA.predictions.nextHourProduction}</Text></View>
-                     <View style={styles.detailRow}><Text>{t.peakTime}: {DUMMY_DATA.predictions.peakTime}</Text></View>
+                     <View style={styles.detailRow}><Text>{t.nextHour}: {energyData.predictions.nextHourProduction}</Text></View>
+                     <View style={styles.detailRow}><Text>{t.peakTime}: {energyData.predictions.peakTime}</Text></View>
                 </View>
 
                 {/* --- EXPORT BUTTON --- */}
