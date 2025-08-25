@@ -5,8 +5,9 @@
  * It handles all the complexity and provides simple function calls.
  */
 
-const { SolChainConfig } = require('../../blockchain/src/config');
+const SolChainConfig = require('../../blockchain/src/config');
 const SolChainAPI = require('../../blockchain/src/solchain-api');
+const { ethers } = require('ethers');
 
 class BlockchainService {
     constructor() {
@@ -95,8 +96,15 @@ class BlockchainService {
         }
 
         try {
-            const result = await this.solchain.createWallet();
-            return this.formatResponse(true, result);
+            // Create a new random wallet
+            const wallet = ethers.Wallet.createRandom();
+            
+            return this.formatResponse(true, {
+                address: wallet.address,
+                privateKey: wallet.privateKey,
+                mnemonic: wallet.mnemonic.phrase,
+                publicKey: wallet.publicKey
+            });
         } catch (error) {
             return this.formatResponse(false, null, error.message);
         }
