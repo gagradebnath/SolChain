@@ -2,11 +2,13 @@
   {
     "id": "2501",
     "username": "JohnDoe",
+    "address": "chalkpota,sherpur,Bogura",
     "buying": false,
     "rate": "0.25 SOL/kWh",
     "email": "john@example.com",
     "passwordHash": "$2b$10$fRomlSeNIyNOxkD2vNOx3uwnFXfxQZDlUyqO0Eunf6xFCNdZJFklS",
     "walletId": "w2501",
+    "meterId": "m2501",
     "latitude": 23.7808875,
     "longitude": 90.2792371,
     "goals": [
@@ -27,11 +29,13 @@
   {
     "id": "2502",
     "username": "Alice",
+    "address": "chalkpota,sherpur,Bogura",
     "buying": false,
     "rate": "0.24 SOL/kWh",
     "email": "alice@example.com",
     "passwordHash": "$2b$10$daPQpE3YdMzIFo8x1DKa5uyfh.0F3o5n5FEmBZ5GykKOqnLPIx/2q",
     "walletId": "w2502",
+    "meterId": "m2502",
     "latitude": 23.810332,
     "longitude": 90.4125181,
     "goals": [
@@ -52,11 +56,13 @@
   {
     "id": "2503",
     "username": "JohnSon",
+    "address": "chalkpota,sherpur,Bogura",
     "buying": false,
     "rate": "0.23 SOL/kWh",
     "email": "johnson@example.com",
     "passwordHash": "$2b$10$daPQpE3YdMzIFo8x1DKa5uyfh.0F3o5n5FEmBZ5GykKOqnLPIx/2q",
     "walletId": "w2503",
+    "meterId": "m2503",
     "latitude": 23.75,
     "longitude": 90.4,
     "goals": [
@@ -77,11 +83,13 @@
   {
     "id": "2504",
     "username": "BinaA",
+    "address": "chalkpota,sherpur,Bogura",
     "buying": false,
     "rate": "0.24 SOL/kWh",
     "email": "bina@example.com",
     "passwordHash": "$2b$10$daPQpE3YdMzIFo8x1DKa5uyfh.0F3o5n5FEmBZ5GykKOqnLPIx/2q",
     "walletId": "w2504",
+    "meterId": "m2504",
     "latitude": 23.79,
     "longitude": 90.42,
     "goals": [
@@ -102,11 +110,13 @@
   {
     "id": "2505",
     "username": "FahimH",
+    "address": "chalkpota,sherpur,Bogura",
     "buying": true,
     "rate": "0.26 SOL/kWh",
     "email": "fahim@example.com",
     "passwordHash": "$2b$10$daPQpE3YdMzIFo8x1DKa5uyfh.0F3o5n5FEmBZ5GykKOqnLPIx/2q",
     "walletId": "w2505",
+    "meterId": "m2505",
     "latitude": 23.77,
     "longitude": 90.36,
     "goals": [
