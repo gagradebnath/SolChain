@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
+const fs = require("fs");
+const path = require("path");
 
 const USER_PROFILE = {
   name: 'John Doe',
@@ -8,6 +10,16 @@ const USER_PROFILE = {
   meterId: 'EM-4573-A8',
   walletAddress: '0x1234ef67',
 };
+
+function getJsonData(filename) {
+  const filePath = path.join(__dirname, '../../database/jsons', filename);
+  if (!fs.existsSync(filePath)) return [];
+  try {
+    return JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+  } catch {
+    return [];
+  }
+}
 
 function authenticateToken(req, res, next) {
   const authHeader = req.headers.authorization;
@@ -26,12 +38,23 @@ function authenticateToken(req, res, next) {
 }
 
 router.get("/", authenticateToken, (req, res) => {
-  const user = req.user;
-  console.log("Authenticated user for Settings Screen:", user);
-
+  const userId = req.user.id;
+  console.log("Authenticated user for Settings Screen:", userId);
+  const users = getJsonData("users.json");
+  const currentUser = users.find(u => u.id === userId);
+  if (!currentUser) return res.status(404).json({ error: "User not found" });
+  const name = currentUser.username;
+  const address = currentUser.address;
+  const meterId = currentUser.meterId;
+  const walletAddress = currentUser.walletId;
   res.json({
     success: true,
-    userProfile: USER_PROFILE,
+    userProfile: {
+      name,
+      address,
+      meterId,
+      walletAddress,
+    }
   });
 
 });

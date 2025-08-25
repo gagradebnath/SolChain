@@ -1,61 +1,77 @@
+
+// const express = require("express");
+// const router = express.Router();
+// const jwt = require("jsonwebtoken");
+// const fs = require("fs");
+// const path = require("path");
+
+// // --- Helper to read JSON file ---
+// function getJsonData(filename) {
+//   const filePath = path.join(__dirname, '../../database/jsons', filename);
+//   if (!fs.existsSync(filePath)) return [];
+//   try {
+//     return JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+//   } catch (err) {
+//     console.error("Error reading JSON file:", err);
+//     return [];
+//   }
+// }
+
+// // --- Token Authentication ---
+// function authenticateToken(req, res, next) {
+//   const authHeader = req.headers.authorization;
+//   if (!authHeader || !authHeader.startsWith("Bearer ")) {
+//     return res.status(401).json({ error: "Unauthorized: No token provided" });
+//   }
+
+//   const token = authHeader.split(" ")[1];
+//   try {
+//     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+//     req.user = decoded;
+//     next();
+//   } catch (err) {
+//     return res.status(403).json({ error: "Invalid token" });
+//   }
+// }
+
+// // --- GET /notifications ---
+// router.get("/", authenticateToken, (req, res) => {
+//   const userId = req.user.id;
+//   console.log("Authenticated user for NotificationScreen:", userId);
+
+//   const allNotifications = getJsonData("notifications.json"); // Array of users
+//   const currentUserData = allNotifications.find(u => u.userId === userId);
+
+//   if (!currentUserData) {
+//     return res.status(404).json({ success: false, data: [], error: "No notifications found for this user" });
+//   }
+
+//   res.json({
+//     success: true,
+//     data: currentUserData.notifications,
+//   });
+// });
+
+// module.exports = router;
 const express = require("express");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
+const fs = require("fs");
+const path = require("path");
 
-// --- DUMMY DATA (from backend) ---
-const DUMMY_NOTIFICATIONS = [
-    {
-        id: '1',
-        title: 'New Trade Alert!',
-        message: 'You have a new energy trade request from Aarav Chowdhury.',
-        type: 'trade',
-        timestamp: '2m ago',
-        isRead: false,
-    },
-    {
-        id: '2',
-        title: 'Transaction Confirmed',
-        message: 'Your sale of 2.5 kWh to Fahim H. was successful. +0.5 SOL added to your wallet.',
-        type: 'transaction',
-        timestamp: '15m ago',
-        isRead: false,
-    },
-    {
-        id: '3',
-        title: 'Community News',
-        message: 'A new policy on energy trading was just announced.',
-        type: 'news',
-        timestamp: '1h ago',
-        isRead: false,
-    },
-    {
-        id: '4',
-        title: 'Network Update',
-        message: 'Your solar generation data for August 2025 has been successfully synced.',
-        type: 'update',
-        timestamp: '3h ago',
-        isRead: true,
-    },
-    {
-        id: '5',
-        title: 'Trade Completed',
-        message: 'Your purchase of 1.2 kWh from Bina A. is now complete.',
-        type: 'transaction',
-        timestamp: '1d ago',
-        isRead: true,
-    },
-    {
-        id: '6',
-        title: 'Welcome to SolChain!',
-        message: 'Your account has been successfully created. Explore the app to get started.',
-        type: 'info',
-        timestamp: '2d ago',
-        isRead: true,
-    },
-];
+// --- Helper to read JSON file ---
+function getJsonData(filename) {
+  const filePath = path.join(__dirname, '../../database/jsons', filename);
+  if (!fs.existsSync(filePath)) return [];
+  try {
+    return JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+  } catch (err) {
+    console.error("Error reading JSON file:", err);
+    return [];
+  }
+}
 
-
-
+// --- Token Authentication ---
 function authenticateToken(req, res, next) {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -72,15 +88,80 @@ function authenticateToken(req, res, next) {
   }
 }
 
+// --- GET /notifications ---
 router.get("/", authenticateToken, (req, res) => {
-  const user = req.user;
-  console.log("Authenticated user for NotificationScreen:", user);
+  const userId = req.user.id;
+  console.log("Authenticated user for NotificationScreen:", userId);
+
+  const allNotifications = getJsonData("notifications.json"); // Array of users
+  const currentUserData = allNotifications.find(u => u.userId === userId);
+
+  if (!currentUserData) {
+    return res.status(404).json({ success: false, data: [], error: "No notifications found for this user" });
+  }
 
   res.json({
     success: true,
-    data: DUMMY_NOTIFICATIONS,
+    data: currentUserData.notifications,
   });
+});
 
+// --- POST /notifications/:id/read ---
+router.post("/:id/read", authenticateToken, (req, res) => {
+    const userId = req.user.id;
+    const notificationId = req.params.id;
+    const filePath = path.join(__dirname, '../../database/jsons', 'notifications.json');
+
+    try {
+        const allUsersNotifications = getJsonData("notifications.json");
+        const userNotificationsIndex = allUsersNotifications.findIndex(u => u.userId === userId);
+
+        if (userNotificationsIndex === -1) {
+            return res.status(404).json({ success: false, error: "User not found" });
+        }
+
+        const userNotifications = allUsersNotifications[userNotificationsIndex].notifications;
+        const notificationToUpdate = userNotifications.find(n => n.id === notificationId);
+
+        if (!notificationToUpdate) {
+            return res.status(404).json({ success: false, error: "Notification not found" });
+        }
+
+        notificationToUpdate.isRead = true;
+
+        fs.writeFileSync(filePath, JSON.stringify(allUsersNotifications, null, 2), 'utf-8');
+
+        res.json({ success: true, message: "Notification marked as read" });
+    } catch (err) {
+        console.error("Error marking notification as read:", err);
+        res.status(500).json({ success: false, error: "Internal server error" });
+    }
+});
+
+// --- POST /notifications/read/all ---
+router.post("/read/all", authenticateToken, (req, res) => {
+    const userId = req.user.id;
+    const filePath = path.join(__dirname, '../../database/jsons', 'notifications.json');
+
+    try {
+        const allUsersNotifications = getJsonData("notifications.json");
+        const userNotificationsIndex = allUsersNotifications.findIndex(u => u.userId === userId);
+
+        if (userNotificationsIndex === -1) {
+            return res.status(404).json({ success: false, error: "User not found" });
+        }
+
+        allUsersNotifications[userNotificationsIndex].notifications.forEach(notif => {
+            notif.isRead = true;
+        });
+
+        fs.writeFileSync(filePath, JSON.stringify(allUsersNotifications, null, 2), 'utf-8');
+
+        res.json({ success: true, message: "All notifications marked as read" });
+    } catch (err) {
+        console.error("Error marking all notifications as read:", err);
+        res.status(500).json({ success: false, error: "Internal server error" });
+    }
 });
 
 module.exports = router;

@@ -3,6 +3,7 @@ const router = express.Router();
 const jwt = require("jsonwebtoken");
 const fs = require("fs");
 const path = require("path");
+const { use } = require("react");
 
 // Helper to read JSON files
 function getJsonData(filename) {
@@ -46,7 +47,6 @@ router.get("/", authenticateToken, (req, res) => {
     const availableUnits = realtime?.available || 0;
     const attemptedOnMarket = realtime?.onMarket || 0;
     const onMarket = attemptedOnMarket > availableUnits ? availableUnits : attemptedOnMarket;
-
     return {
       id: u.id,
       name: u.username,
@@ -58,8 +58,7 @@ router.get("/", authenticateToken, (req, res) => {
       coordinate: { latitude: u.latitude, longitude: u.longitude }
     };
   });
-
-
+  console.log(`User ${req.user.id} fetched sellers list, found ${sellers.length} sellers.`);
   res.json({
     success: true,
     data: sellers,
@@ -78,6 +77,7 @@ router.post("/buyNow", authenticateToken, (req, res) => {
   const realtimeArr = getJsonData('realtime.json');
   const walletsArr = getJsonData('wallets.json');
   const transactionsArr = getJsonData('transactions.json');
+  const notificationsArr = getJsonData('notifications.json'); // <- notifications
 
   const sellerIndex = usersArr.findIndex(u => u.id === sellerId);
   const sellerRealtimeIndex = realtimeArr.findIndex(r => r.userId === sellerId);
@@ -98,8 +98,9 @@ router.post("/buyNow", authenticateToken, (req, res) => {
 
   // Reduce seller's available energy
   realtimeArr[sellerRealtimeIndex].available = +(available - amount).toFixed(3);
-  // update buyer's available energy
-  realtimeArr[buyerWalletIndex].available = +(realtimeArr[buyerWalletIndex].available + amount).toFixed(3);
+  // Update buyer's available energy
+  const buyerRealtimeIndex = realtimeArr.findIndex(r => r.userId === buyer.id);
+  realtimeArr[buyerRealtimeIndex].available = +(realtimeArr[buyerRealtimeIndex].available + amount).toFixed(3);
 
   // Reduce onMarket if needed
   const onMarket = realtimeArr[sellerRealtimeIndex].onMarket || 0;
@@ -113,12 +114,11 @@ router.post("/buyNow", authenticateToken, (req, res) => {
   walletsArr[sellerWalletIndex].balance = +(walletsArr[sellerWalletIndex].balance + totalCost).toFixed(3);
   walletsArr[sellerWalletIndex].energyCredits = +(walletsArr[sellerWalletIndex].energyCredits - amount).toFixed(3);
 
-  // Generate unique transaction ID
+  // Create transaction
   let maxId = transactionsArr
     .map(t => parseInt(t.id.replace(/^tx/, '')))
     .reduce((acc, val) => Math.max(acc, val), 0);
   const newTxId = `tx${maxId + 1}`;
-
   const newTx = {
     id: newTxId,
     from: sellerId,
@@ -129,12 +129,56 @@ router.post("/buyNow", authenticateToken, (req, res) => {
     timestamp: new Date().toISOString(),
     type: "sell",
   };
-
   transactionsArr.push(newTx);
 
+  // --- Add notifications for buyer and seller ---
+  const buyerNotification = {
+    id: Date.now().toString() + "_b",
+    title: 'Purchase Successful',
+    message: `You purchased ${amount} kWh from ${usersArr[sellerIndex].username} at $${rate}/kWh.`,
+    type: 'transaction',
+    timestamp: new Date().toISOString(),
+    isRead: false
+  };
+
+  const sellerNotification = {
+    id: Date.now().toString() + "_s",
+    title: 'Energy Sold',
+    message: `${buyer.username} purchased ${amount} kWh from you at $${rate}/kWh.`,
+    type: 'transaction',
+    timestamp: new Date().toISOString(),
+    isRead: false
+  };
+  const sellerNotificationIndex = notificationsArr.findIndex(n => n.userId === sellerId);
+  const buyerNotificationIndex = notificationsArr.findIndex(n => n.userId === buyer.id);
+  
+
+  if (buyerNotificationIndex !== -1) {
+    notificationsArr[buyerNotificationIndex].notifications.push(buyerNotification);
+  } else {
+    notificationsArr.push({
+      userId: buyer.id,
+      notifications: [buyerNotification]
+    });
+  }
+
+  if (sellerNotificationIndex !== -1) {
+    notificationsArr[sellerNotificationIndex].notifications.push(sellerNotification);
+  } else {
+    notificationsArr.push({
+      userId: sellerId,
+      notifications: [sellerNotification]
+    });
+  }
+
+  const sellerUserIndex = usersArr.findIndex(u => u.id === sellerId);
+  usersArr[sellerUserIndex].buying = true;
+  // Save all changes
   saveJsonData('realtime.json', realtimeArr);
   saveJsonData('wallets.json', walletsArr);
   saveJsonData('transactions.json', transactionsArr);
+  saveJsonData('notifications.json', notificationsArr);
+  saveJsonData('users.json', usersArr);
 
   res.json({
     success: true,
@@ -146,5 +190,6 @@ router.post("/buyNow", authenticateToken, (req, res) => {
     sellerWallet: walletsArr[sellerWalletIndex],
   });
 });
+
 
 module.exports = router;

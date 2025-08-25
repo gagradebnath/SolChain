@@ -70,12 +70,61 @@ router.get("/", authenticateToken, (req, res) => {
 });
 
 // POST energy to market
+// router.post("/onMarket", authenticateToken, (req, res) => {
+//   const user = req.user;
+//   const { amount, price } = req.body;
+
+//   const usersArr = getJsonData('users.json');
+//   const realtimeArr = getJsonData('realtime.json');
+
+//   const userIndex = usersArr.findIndex(u => u.id === user.id);
+//   const realtimeIndex = realtimeArr.findIndex(r => r.userId === user.id);
+
+//   if (userIndex === -1 || realtimeIndex === -1) {
+//     return res.status(404).json({ success: false, error: "User not found" });
+//   }
+
+//   const available = realtimeArr[realtimeIndex].available;
+//   const currentOnMarket = realtimeArr[realtimeIndex].onMarket || 0;
+
+//   if (amount + currentOnMarket > available) {
+//     return res.status(400).json({
+//       success: false,
+//       message: `Cannot list ${amount} kWh. Available: ${available} kWh`,
+//     });
+//   }
+
+//   // Update onMarket
+//   realtimeArr[realtimeIndex].onMarket = currentOnMarket + amount;
+
+//   // Set buying = false in users.json
+//   usersArr[userIndex].buying = false;
+
+//   // Save changes
+//   saveJsonData('realtime.json', realtimeArr);
+//   saveJsonData('users.json', usersArr);
+//   console.log(`User ${user.id} listed ${amount} kWh at $${price}/kWh`);
+//   res.json({
+//     success: true,
+//     message: "Energy listed for sale successfully!",
+//     data: {
+//       userId: user.id,
+//       onMarket: realtimeArr[realtimeIndex].onMarket,
+//       available: realtimeArr[realtimeIndex].available,
+//       attempted: amount,
+//       price,
+//     },
+//   });
+// });
+
+// --- POST energy to market ---
 router.post("/onMarket", authenticateToken, (req, res) => {
   const user = req.user;
   const { amount, price } = req.body;
 
   const usersArr = getJsonData('users.json');
   const realtimeArr = getJsonData('realtime.json');
+  const notificationsArr = getJsonData('notifications.json'); // <-- read notifications JSON
 
   const userIndex = usersArr.findIndex(u => u.id === user.id);
   const realtimeIndex = realtimeArr.findIndex(r => r.userId === user.id);
@@ -100,9 +149,34 @@ router.post("/onMarket", authenticateToken, (req, res) => {
   // Set buying = false in users.json
   usersArr[userIndex].buying = false;
 
+  // --- Add Notification ---
+  const userNotificationIndex = notificationsArr.findIndex(n => n.userId === user.id);
+  const newNotification = {
+    id: Date.now().toString(), // unique ID
+    title: 'Energy Listed for Sale',
+    message: `You listed ${amount} kWh at $${price}/kWh on the market.`,
+    type: 'trade',
+    timestamp: new Date().toISOString(), // ISO 8601 format
+    isRead: false,
+};
+
+  if (userNotificationIndex !== -1) {
+    // Append to existing notifications
+    notificationsArr[userNotificationIndex].notifications.push(newNotification);
+  } else {
+    // Create new notification entry for user
+    notificationsArr.push({
+      userId: user.id,
+      notifications: [newNotification],
+    });
+  }
+
   // Save changes
   saveJsonData('realtime.json', realtimeArr);
   saveJsonData('users.json', usersArr);
+  saveJsonData('notifications.json', notificationsArr);
+
+  console.log(`User ${user.id} listed ${amount} kWh at $${price}/kWh`);
 
   res.json({
     success: true,
@@ -116,6 +190,7 @@ router.post("/onMarket", authenticateToken, (req, res) => {
     },
   });
 });
+
 
 router.post("/mode", authenticateToken, (req, res) => {
   const { sellMode } = req.body;

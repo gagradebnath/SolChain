@@ -1,0 +1,155 @@
+[
+  {
+    "userId": "2501",
+    "notifications": [
+      {
+        "id": "n1",
+        "title": "New Trade Executed",
+        "message": "Your trade for 10 kWh has been executed.",
+        "type": "trade",
+        "timestamp": "2025-08-25T08:30:00Z",
+        "isRead": false
+      },
+      {
+        "id": "n2",
+        "title": "Wallet Transaction",
+        "message": "You received 5 carbon credits.",
+        "type": "transaction",
+        "timestamp": "2025-08-24T14:15:00Z",
+        "isRead": true
+      },
+      {
+        "id": "n3",
+        "title": "System Update",
+        "message": "New features added to your dashboard.",
+        "type": "update",
+        "timestamp": "2025-08-23T10:00:00Z",
+        "isRead": true
+      },
+      {
+        "id": "n4",
+        "title": "New Trade Executed",
+        "message": "Your trade for 5 kWh has been executed.",
+        "type": "trade",
+        "timestamp": "2025-08-25T08:30:00Z",
+        "isRead": false
+      },
+      {
+        "id": "n5",
+        "title": "New Trade Executed",
+        "message": "Your trade for 5 kWh has been executed.",
+        "type": "trade",
+        "timestamp": "2025-08-25T08:30:00Z",
+        "isRead": true
+      },
+      {
+        "id": "1756143035113",
+        "title": "Energy Listed for Sale",
+        "message": "You listed 0.5 kWh at $0.2/kWh on the market.",
+        "type": "trade",
+        "timestamp": "2025-08-25T17:30:35.113Z",
+        "isRead": false
+      }
+    ]
+  },
+  {
+    "userId": "2502",
+    "notifications": [
+      {
+        "id": "n4",
+        "title": "News Update",
+        "message": "Energy market prices updated today.",
+        "type": "news",
+        "timestamp": "2025-08-25T09:00:00Z",
+        "isRead": false
+      },
+      {
+        "id": "n5",
+        "title": "Wallet Transaction",
+        "message": "You sent 2 carbon credits to user3.",
+        "type": "transaction",
+        "timestamp": "2025-08-24T16:30:00Z",
+        "isRead": true
+      }
+    ]
+  },
+  {
+    "userId": "2503",
+    "notifications": [
+      {
+        "id": "n6",
+        "title": "Trade Alert",
+        "message": "Your trade request is pending approval.",
+        "type": "trade",
+        "timestamp": "2025-08-24T11:45:00Z",
+        "isRead": false
+      },
+      {
+        "id": "1756143811264_s",
+        "title": "Energy Sold",
+        "message": "undefined purchased 2 kWh from you at $0.24/kWh.",
+        "type": "transaction",
+        "timestamp": "2025-08-25T17:43:31.264Z",
+        "isRead": false
+      }
+    ]
+  },
+  {
+    "userId": "2504",
+    "notifications": [
+      {
+        "id": "1756144115615",
+        "title": "Energy Listed for Sale",
+        "message": "You listed 1.8 kWh at $0.2/kWh on the market.",
+        "type": "trade",
+        "timestamp": "2025-08-25T17:48:35.615Z",
+        "isRead": true
+      },
+      {
+        "id": "1756144390976_s",
+        "title": "Energy Sold",
+        "message": "undefined purchased 1.8 kWh from you at $0.24/kWh.",
+        "type": "transaction",
+        "timestamp": "2025-08-25T17:53:10.976Z",
+        "isRead": true
+      },
+      {
+        "id": "1756144430815",
+        "title": "Energy Listed for Sale",
+        "message": "You listed 1.5 kWh at $0.2/kWh on the market.",
+        "type": "trade",
+        "timestamp": "2025-08-25T17:53:50.815Z",
+        "isRead": true
+      }
+    ]
+  },
+  {
+    "userId": "2505",
+    "notifications": [
+      {
+        "id": "n9",
+        "title": "Wallet Transaction",
+        "message": "You received 10 kWh from user2.",
+        "type": "transaction",
+        "timestamp": "2025-08-24T18:10:00Z",
+        "isRead": false
+      },
+      {
+        "id": "1756143811264_b",
+        "title": "Purchase Successful",
+        "message": "You purchased 2 kWh from BinaA at $0.24/kWh.",
+        "type": "transaction",
+        "timestamp": "2025-08-25T17:43:31.264Z",
+        "isRead": false
+      },
+      {
+        "id": "1756144390976_b",
+        "title": "Purchase Successful",
+        "message": "You purchased 1.8 kWh from BinaA at $0.24/kWh.",
+        "type": "transaction",
+        "timestamp": "2025-08-25T17:53:10.976Z",
+        "isRead": false
+      }
+    ]
+  }
+]
