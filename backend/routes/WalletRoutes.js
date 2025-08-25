@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
-const blockchainService = require("../services/blockchainService");
+const blockchainService = require("../services/BlockchainService");
 
 
 function authenticateToken(req, res, next) {

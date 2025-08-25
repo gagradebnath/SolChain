@@ -5,7 +5,7 @@
  * It verifies that all blockchain operations work correctly.
  */
 
-const blockchainService = require('./services/blockchainService');
+const blockchainService = require('./services/BlockchainService');
 
 async function runIntegrationTests() {
     console.log('🧪 Starting SolChain Backend-Blockchain Integration Tests\n');
