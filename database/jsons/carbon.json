@@ -1,0 +1,42 @@
+[
+  {
+    "userId": "2501",
+    "savedToday": 2.5,
+    "totalSaved": 150.2,
+    "treesPlantedEquivalent": 7.5,
+    "emissionOffsetPerKWh": 0.48,
+    "projectedSavingsNextWeek": 18.0
+  },
+  {
+    "userId": "2502",
+    "savedToday": 1.8,
+    "totalSaved": 120.5,
+    "treesPlantedEquivalent": 6.0,
+    "emissionOffsetPerKWh": 0.48,
+    "projectedSavingsNextWeek": 12.5
+  },
+  {
+    "userId": "2503",
+    "savedToday": 2.5,
+    "totalSaved": 150.2,
+    "treesPlantedEquivalent": 7.5,
+    "emissionOffsetPerKWh": 0.48,
+    "projectedSavingsNextWeek": 18.0
+  },
+  {
+    "userId": "2504",
+    "savedToday": 1.8,
+    "totalSaved": 120.5,
+    "treesPlantedEquivalent": 6.0,
+    "emissionOffsetPerKWh": 0.48,
+    "projectedSavingsNextWeek": 12.5
+  },
+  {
+    "userId": "2505",
+    "savedToday": 2.5,
+    "totalSaved": 150.2,
+    "treesPlantedEquivalent": 7.5,
+    "emissionOffsetPerKWh": 0.48,
+    "projectedSavingsNextWeek": 18.0
+  }
+]

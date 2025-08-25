@@ -1,0 +1,56 @@
+[
+  {
+    "userId": "2501",
+    "level": 85,
+    "status": "Charging",
+    "health": 98,
+    "chargeCycles": 120,
+    "maxCapacity": 10.0,
+    "dischargeHistory": [0.5, 0.8, 0.7, 0.6]
+  },
+  {
+    "userId": "2502",
+    "level": 65,
+    "status": "Discharging",
+    "health": 95,
+    "chargeCycles": 140,
+    "maxCapacity": 8.0,
+    "dischargeHistory": [0.3, 0.4, 0.5, 0.2]
+  },
+  {
+    "userId": "2503",
+    "level": 85,
+    "status": "Charging",
+    "health": 98,
+    "chargeCycles": 120,
+    "maxCapacity": 10.0,
+    "dischargeHistory": [0.5, 0.8, 0.7, 0.6]
+  },
+  {
+    "userId": "2504",
+    "level": 65,
+    "status": "Discharging",
+    "health": 95,
+    "chargeCycles": 140,
+    "maxCapacity": 8.0,
+    "dischargeHistory": [0.3, 0.4, 0.5, 0.2]
+  },
+  {
+    "userId": "2505",
+    "level": 85,
+    "status": "Charging",
+    "health": 98,
+    "chargeCycles": 120,
+    "maxCapacity": 10.0,
+    "dischargeHistory": [0.5, 0.8, 0.7, 0.6]
+  },
+  {
+    "userId": "2506",
+    "level": 65,
+    "status": "Discharging",
+    "health": 95,
+    "chargeCycles": 140,
+    "maxCapacity": 8.0,
+    "dischargeHistory": [0.3, 0.4, 0.5, 0.2]
+  }
+]

@@ -1,0 +1,127 @@
+[
+  {
+    "id": "2501",
+    "username": "JohnDoe",
+    "buying": false,
+    "rate": "0.25 SOL/kWh",
+    "email": "john@example.com",
+    "passwordHash": "$2b$10$fRomlSeNIyNOxkD2vNOx3uwnFXfxQZDlUyqO0Eunf6xFCNdZJFklS",
+    "walletId": "w2501",
+    "latitude": 23.7808875,
+    "longitude": 90.2792371,
+    "goals": [
+      {
+        "id": "1",
+        "title": "Reduce Consumption",
+        "target": "20%",
+        "progress": 65
+      },
+      {
+        "id": "2",
+        "title": "Earn SOL",
+        "target": "100 SOL",
+        "progress": 40
+      }
+    ]
+  },
+  {
+    "id": "2502",
+    "username": "Alice",
+    "buying": false,
+    "rate": "0.24 SOL/kWh",
+    "email": "alice@example.com",
+    "passwordHash": "$2b$10$daPQpE3YdMzIFo8x1DKa5uyfh.0F3o5n5FEmBZ5GykKOqnLPIx/2q",
+    "walletId": "w2502",
+    "latitude": 23.810332,
+    "longitude": 90.4125181,
+    "goals": [
+      {
+        "id": "1",
+        "title": "Reduce Consumption",
+        "target": "15%",
+        "progress": 50
+      },
+      {
+        "id": "2",
+        "title": "Earn SOL",
+        "target": "80 SOL",
+        "progress": 30
+      }
+    ]
+  },
+  {
+    "id": "2503",
+    "username": "JohnSon",
+    "buying": false,
+    "rate": "0.23 SOL/kWh",
+    "email": "johnson@example.com",
+    "passwordHash": "$2b$10$daPQpE3YdMzIFo8x1DKa5uyfh.0F3o5n5FEmBZ5GykKOqnLPIx/2q",
+    "walletId": "w2503",
+    "latitude": 23.75,
+    "longitude": 90.4,
+    "goals": [
+      {
+        "id": "1",
+        "title": "Reduce Consumption",
+        "target": "10%",
+        "progress": 70
+      },
+      {
+        "id": "2",
+        "title": "Earn SOL",
+        "target": "120 SOL",
+        "progress": 55
+      }
+    ]
+  },
+  {
+    "id": "2504",
+    "username": "BinaA",
+    "buying": false,
+    "rate": "0.24 SOL/kWh",
+    "email": "bina@example.com",
+    "passwordHash": "$2b$10$daPQpE3YdMzIFo8x1DKa5uyfh.0F3o5n5FEmBZ5GykKOqnLPIx/2q",
+    "walletId": "w2504",
+    "latitude": 23.79,
+    "longitude": 90.42,
+    "goals": [
+      {
+        "id": "1",
+        "title": "Reduce Consumption",
+        "target": "12%",
+        "progress": 45
+      },
+      {
+        "id": "2",
+        "title": "Earn SOL",
+        "target": "90 SOL",
+        "progress": 25
+      }
+    ]
+  },
+  {
+    "id": "2505",
+    "username": "FahimH",
+    "buying": true,
+    "rate": "0.26 SOL/kWh",
+    "email": "fahim@example.com",
+    "passwordHash": "$2b$10$daPQpE3YdMzIFo8x1DKa5uyfh.0F3o5n5FEmBZ5GykKOqnLPIx/2q",
+    "walletId": "w2505",
+    "latitude": 23.77,
+    "longitude": 90.36,
+    "goals": [
+      {
+        "id": "1",
+        "title": "Reduce Consumption",
+        "target": "18%",
+        "progress": 60
+      },
+      {
+        "id": "2",
+        "title": "Earn SOL",
+        "target": "110 SOL",
+        "progress": 35
+      }
+    ]
+  }
+]

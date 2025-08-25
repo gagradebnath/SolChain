@@ -32,7 +32,6 @@ export default function App() {
 
       const { token, user } = data;
       await AsyncStorage.setItem('token', token);
-      console.log('JWT Token:', token);
       console.log('User Info:', user);
       setMessage(`Welcome ${user.email}`);
       navigation.navigate('HomeScreen');
@@ -87,11 +86,8 @@ export default function App() {
 
           <View style={styles.switchContainer}>
             <Text style={styles.switchText}>
-              {isLogin ? "Don't have an account?" : 'Already have an account?'}
+              Sell the Sun, Make the future Greener
             </Text>
-            <TouchableOpacity onPress={() => setIsLogin(!isLogin)}>
-              <Text style={styles.switchButton}>{isLogin ? 'Sign Up' : 'Sign In'}</Text>
-            </TouchableOpacity>
           </View>
 
           {message ? <Text style={styles.message}>{message}</Text> : null}
