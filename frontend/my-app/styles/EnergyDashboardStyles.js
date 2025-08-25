@@ -133,11 +133,12 @@ const styles = StyleSheet.create({
         color: '#666',
     },
     chartPlaceholder: {
-        height: 150,
-        backgroundColor: '#E9ECEF',
-        borderRadius: 10,
-        justifyContent: 'center',
-        alignItems: 'center',
+        flexDirection: 'row', // <--- This is the key change
+        justifyContent: 'space-between', // Or 'space-around', 'flex-start'
+        alignItems: 'flex-end', // <--- Align the whole set of bars to the bottom
+        height: 150, // Match the MAX_CHART_HEIGHT used in the component
+        width: '100%',
+        paddingHorizontal: 10,
     },
     chartPlaceholderText: {
         color: '#ADB5BD',

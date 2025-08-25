@@ -1,0 +1,42 @@
+[
+  {
+    "userId": "2501",
+    "date": "2024-08-25",
+    "production": 5.2,
+    "consumption": 3.1,
+    "savings": 15.75,
+    "unit": "kWh"
+  },
+  {
+    "userId": "2502",
+    "date": "2024-08-25",
+    "production": 4.8,
+    "consumption": 3.5,
+    "savings": 12.60,
+    "unit": "kWh"
+  },
+  {
+    "userId": "2503",
+    "date": "2024-08-25",
+    "production": 6.1,
+    "consumption": 4.2,
+    "savings": 18.10,
+    "unit": "kWh"
+  },
+  {
+    "userId": "2504",
+    "date": "2024-08-25",
+    "production": 4.8,
+    "consumption": 3.5,
+    "savings": 12.60,
+    "unit": "kWh"
+  },
+  {
+    "userId": "2505",
+    "date": "2024-08-25",
+    "production": 6.1,
+    "consumption": 4.2,
+    "savings": 18.10,
+    "unit": "kWh"
+  }
+]

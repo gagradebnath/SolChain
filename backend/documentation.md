@@ -1,148 +1,249 @@
-# SolChain Platform - Technical Documentation
+# SolChain Backend Routes Documentation
 
-This document details the functions, API endpoints, and data flows for both the backend (`solBend`) and frontend (`frontend/my-app`) of the SolChain platform.  
-It is intended to support integration with machine learning and blockchain modules.
-
----
-
-## Backend (`solBend`)
-
-### Main Entry: `app.js`
-- **Purpose:** Initializes Express app, sets up middleware, connects to DB, and mounts routes.
-- **Key Functions:**
-  - `app.use(express.json())` — Parses JSON request bodies.
-  - `app.use('/api/users', userRoutes)` — Mounts user-related endpoints.
-  - `app.use('/api/wallet', walletRoutes)` — Mounts wallet endpoints.
-  - `app.use('/api/transactions', transactionRoutes)` — Mounts transaction endpoints.
-- **Data Used:** None directly; acts as a router.
+This document describes how each route in `backend/routes/` interacts with the JSON-based database (`database/jsons/`) and how data is sent to the frontend.
 
 ---
 
-### Routes
+## General Architecture
 
-#### 1. `routes/userRoutes.js`
-- **Endpoints & Functions:**
-  - `POST /api/users/register` → `registerUser(req, res)`
-    - **Data Required:** `{ username, email, password }`
-    - **Description:** Registers a new user, hashes password, stores in DB.
-  - `POST /api/users/login` → `loginUser(req, res)`
-    - **Data Required:** `{ email, password }`
-    - **Description:** Authenticates user, returns JWT.
-  - `GET /api/users/profile` → `getUserProfile(req, res)`
-    - **Data Required:** JWT in headers.
-    - **Description:** Returns user profile data.
-- **Integration Points:** User data may be used for ML-based fraud detection or blockchain identity management.
-
-#### 2. `routes/walletRoutes.js`
-- **Endpoints & Functions:**
-  - `GET /api/wallet/:userId` → `getWallet(req, res)`
-    - **Data Required:** `userId` param, JWT.
-    - **Description:** Fetches wallet info for user.
-  - `POST /api/wallet/create` → `createWallet(req, res)`
-    - **Data Required:** `{ userId }`
-    - **Description:** Creates a new wallet, generates blockchain address.
-- **Integration Points:** Wallet creation may interact with blockchain smart contracts.
-
-#### 3. `routes/transactionRoutes.js`
-- **Endpoints & Functions:**
-  - `POST /api/transactions/send` → `sendTransaction(req, res)`
-    - **Data Required:** `{ from, to, amount, token }`
-    - **Description:** Initiates a blockchain transaction.
-  - `GET /api/transactions/:userId` → `getTransactions(req, res)`
-    - **Data Required:** `userId` param.
-    - **Description:** Returns transaction history for user.
-- **Integration Points:** Transaction data can be used for ML anomaly detection and blockchain ledger updates.
+- **Database:**  
+  The backend uses JSON files in `database/jsons/` as its data store. Each route reads from and writes to these files using Node.js `fs` module.
+- **API:**  
+  Each route exposes RESTful endpoints that the frontend calls to fetch or update data. Data is sent as JSON responses.
 
 ---
 
-## Frontend (`frontend/my-app`)
+## Route-by-Route Overview
 
-### API Configuration
-- **File:** `assets/config.js`
-  - `API_BASE_URL` — Used for all API calls.
-
----
-
-### Screens
-
-#### 1. `screens/HomeScreen.js`
-- **Functions Used:**
-  - `fetchUserData()` — Calls `/api/users/profile` to get user info.
-  - `fetchWalletData()` — Calls `/api/wallet/:userId` for wallet balance.
-- **Data Required:** JWT token, userId.
-- **Data Displayed:** User name, wallet balance, recent transactions.
-
-#### 2. `screens/WalletScreen.js`
-- **Functions Used:**
-  - `fetchWalletData()` — Gets wallet details.
-  - `createWallet()` — Calls `/api/wallet/create` to create a new wallet.
-- **Data Required:** userId, JWT.
-- **Data Displayed:** Wallet address, balance, QR code.
-
-#### 3. `screens/SendScreen.js`
-- **Functions Used:**
-  - `sendTransaction()` — Calls `/api/transactions/send` to send tokens.
-- **Data Required:** `{ from, to, amount, token }`, JWT.
-- **Data Displayed:** Transaction status, confirmation.
-
-#### 4. `screens/TransactionsScreen.js`
-- **Functions Used:**
-  - `fetchTransactions()` — Calls `/api/transactions/:userId` for history.
-- **Data Required:** userId, JWT.
-- **Data Displayed:** List of transactions (date, amount, status).
-
-#### 5. `screens/ProfileScreen.js`
-- **Functions Used:**
-  - `fetchUserProfile()` — Gets user profile.
-  - `updateProfile()` — Updates user info.
-- **Data Required:** JWT, profile fields.
-- **Data Displayed:** Username, email, preferences.
-
-#### 6. `screens/LoginScreen.js` / `screens/RegisterScreen.js`
-- **Functions Used:**
-  - `loginUser()` — Calls `/api/users/login`.
-  - `registerUser()` — Calls `/api/users/register`.
-- **Data Required:** Email, password, username.
-- **Data Displayed:** Login/register status, error messages.
+### 1. `AuthRoutes.js`
+- **Purpose:** Handles user authentication (login).
+- **Database Interaction:**  
+  - Reads `users.json` to find and verify user credentials.
+  - Uses bcrypt to compare password hashes.
+- **Frontend Data:**  
+  - On successful login, sends `{ token, user: { email, id, name } }`.
+  - On failure, sends `{ error: "Invalid email/ID or password" }`.
 
 ---
 
-## Data Flow Example
-
-1. **User logs in:**  
-   - `LoginScreen` → `loginUser()` → `/api/users/login`  
-   - Receives JWT, stored locally.
-
-2. **User views wallet:**  
-   - `HomeScreen` or `WalletScreen` → `fetchWalletData()` → `/api/wallet/:userId`  
-   - Displays balance and address.
-
-3. **User sends tokens:**  
-   - `SendScreen` → `sendTransaction()` → `/api/transactions/send`  
-   - Shows confirmation.
-
----
-
-## Integration Notes
-
-- **ML Integration:**  
-  - User and transaction data can be sent to ML modules for fraud detection, recommendations, etc.
-- **Blockchain Integration:**  
-  - Wallet and transaction endpoints interact with blockchain nodes or smart contracts.
+### 2. `HomeScreen.js`
+- **Purpose:** Serves the main dashboard data for authenticated users.
+- **Database Interaction:**  
+  - Reads from multiple JSONs:  
+    - `energyOverview.json` for energy stats  
+    - `recentActivity.json` for activity feed  
+    - `weather.json` for weather info  
+    - `market.json` for market prices  
+    - `users.json` for user goals
+- **Frontend Data:**  
+  - Sends a combined JSON object with all dashboard data:
+    ```json
+    {
+      "energyOverview": { ... },
+      "recentActivity": [ ... ],
+      "weather": { ... },
+      "marketPrices": { ... },
+      "goals": [ ... ]
+    }
+    ```
 
 ---
 
-## How to Extend
-
-- Add new endpoints in `backend/routes/` and corresponding controllers.
-- Add new screens in `frontend/my-app/screens/` and connect to backend via `config.js`.
-
----
-
-## License
-
-MIT
+### 3. `WalletRoutes.js`
+- **Purpose:** Manages user wallets.
+- **Database Interaction:**  
+  - Reads and writes to `wallets.json` for wallet info and balances.
+- **Frontend Data:**  
+  - Sends wallet details, balance, and transaction status.
 
 ---
 
-**For a complete and precise documentation, please provide the actual code for each route
+### 4. `EnergyRoutes.js`
+- **Purpose:** Handles energy production, consumption, and related stats.
+- **Database Interaction:**  
+  - Reads/writes `energyData.json` for user/device energy metrics.
+- **Frontend Data:**  
+  - Sends energy stats, trends, and analytics.
+
+---
+
+### 5. `goalsRoutes.js`
+- **Purpose:** Manages user goals.
+- **Database Interaction:**  
+  - Reads/writes `users.json` (goals are stored as a field in each user object).
+- **Frontend Data:**  
+  - Sends user goals and progress.
+
+---
+
+### 6. `CommunityScreenRoutes.js`
+- **Purpose:** Handles community features (e.g., leaderboards, shared stats).
+- **Database Interaction:**  
+  - Reads from `users.json`, `energyData.json`, or other relevant files.
+- **Frontend Data:**  
+  - Sends aggregated community data.
+
+---
+
+### 7. `notificationRoutes.js`
+- **Purpose:** Manages notifications for users.
+- **Database Interaction:**  
+  - Reads/writes `activity.json` or a dedicated notifications JSON.
+- **Frontend Data:**  
+  - Sends notification lists and statuses.
+
+---
+
+### 8. `buyRoutes.js` and `SellRoutes.js`
+
+#### Purpose
+These routes handle the buying and selling of energy or tokens between users and/or the grid. They facilitate peer-to-peer energy trading and update user balances, transaction records, and market data accordingly.
+
+---
+
+#### Database Interaction
+
+- **Reads from:**
+  - `market.json`: To get the current buy/sell prices for energy or tokens.
+  - `users.json`: To verify user identity and update user-related data if needed.
+  - `wallets.json`: To check and update user wallet balances.
+  - `transactions.json`: To record each buy/sell transaction for history and analytics.
+
+- **Writes to:**
+  - `wallets.json`: Updates the buyer's and seller's balances after a transaction.
+  - `transactions.json`: Appends a new transaction record with details (amount, from, to, price, timestamp, etc.).
+  - Optionally, `market.json`: If the transaction affects market prices (e.g., dynamic pricing).
+
+---
+
+#### Typical Data Flow
+
+1. **Frontend Request:**  
+   The frontend sends a POST request to `/api/buy` or `/api/sell` with:
+   ```json
+   {
+     "userId": "user1",
+     "amount": 5,
+     "unit": "kWh",
+     "price": 0.25
+   }
+   ```
+2. **Backend Processing:**
+   - Authenticates the user.
+   - Reads `market.json` to validate the price.
+   - Reads `wallets.json` to check balances (buyer must have enough tokens, seller must have enough energy).
+   - Updates balances in `wallets.json`.
+   - Appends a new record to `transactions.json`:
+     ```json
+     {
+       "id": "tx123",
+       "from": "user1",
+       "to": "user2",
+       "amount": 5,
+       "unit": "kWh",
+       "price": 0.25,
+       "timestamp": "2024-08-25T12:00:00Z",
+       "type": "buy"
+     }
+     ```
+   - Optionally updates `market.json` if prices are dynamic.
+
+3. **Backend Response:**
+   - Returns a JSON response with transaction status, updated balances, and possibly updated market prices:
+     ```json
+     {
+       "success": true,
+       "transaction": { ... },
+       "buyerWallet": { ... },
+       "sellerWallet": { ... },
+       "marketPrices": { ... }
+     }
+     ```
+
+---
+
+#### Example Use Cases
+
+- **Buy Route (`buyRoutes.js`):**
+  - User A wants to buy 5 kWh from the grid or another user.
+  - Backend checks if User A has enough tokens, deducts tokens, credits energy, records the transaction.
+
+- **Sell Route (`SellRoutes.js`):**
+  - User B wants to sell 3 kWh to the grid or another user.
+  - Backend checks if User B has enough energy, deducts energy, credits tokens, records the transaction.
+
+---
+
+#### Error Handling
+
+- If the user does not have enough balance (tokens or energy), the backend responds with an error message.
+- If the price is not valid or market is closed, an appropriate error is returned.
+
+---
+
+#### Security
+
+- All buy/sell requests should be authenticated (JWT token).
+- All balance updates and transaction records should be atomic to prevent inconsistencies.
+
+---
+
+#### Summary Table
+
+| File              | Read | Write | Purpose                                  |
+|-------------------|------|-------|------------------------------------------|
+| `market.json`     | ✔️   | ✔️    | Get/update current market prices         |
+| `users.json`      | ✔️   | ✔️    | Verify user, update user data if needed  |
+| `wallets.json`    | ✔️   | ✔️    | Check/update user balances               |
+| `transactions.json`| ✔️   | ✔️    | Record transaction history               |
+
+---
+
+---
+
+### 9. `settingRoutes.js`
+- **Purpose:** Manages user settings and preferences.
+- **Database Interaction:**  
+  - Reads/writes `users.json` for user-specific settings.
+- **Frontend Data:**  
+  - Sends current settings and confirmation of updates.
+
+---
+
+### 10. `statsRoutes.js`
+- **Purpose:** Provides statistical summaries and analytics.
+- **Database Interaction:**  
+  - Reads from multiple JSONs (e.g., `energyData.json`, `transactions.json`).
+- **Frontend Data:**  
+  - Sends aggregated stats and analytics.
+
+---
+
+## How Data Flows
+
+1. **Frontend makes an HTTP request** to a backend route (e.g., `/api/home`).
+2. **Backend route authenticates** the user (if required).
+3. **Backend reads relevant JSON files** using `fs.readFileSync` or similar.
+4. **Backend processes and formats the data** as needed.
+5. **Backend sends a JSON response** to the frontend.
+6. **Frontend displays the data** in the UI.
+
+---
+
+## Example: Fetching User Dashboard
+
+- **Frontend:**  
+  Sends `GET /api/home` with JWT token.
+- **Backend:**  
+  - Authenticates token.
+  - Reads user-specific data from multiple JSONs.
+  - Sends combined dashboard data as JSON.
+
+---
+
+## Notes
+
+- All data is exchanged in JSON format.
+- For production, consider migrating from JSON files to a real database for scalability and concurrency.
+
+---

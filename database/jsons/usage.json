@@ -1,0 +1,62 @@
+[
+  {
+    "userId":"2501",
+    "weeklyData": [
+      { "day": "Mon", "usage": 4.5, "generation": 5.2 },
+      { "day": "Tue", "usage": 5.0, "generation": 5.5 },
+      { "day": "Wed", "usage": 4.8, "generation": 5.1 },
+      { "day": "Thu", "usage": 5.2, "generation": 5.8 },
+      { "day": "Fri", "usage": 4.9, "generation": 5.3 },
+      { "day": "Sat", "usage": 5.5, "generation": 6.0 },
+      { "day": "Sun", "usage": 5.8, "generation": 6.2 }
+    ]
+  },
+  {
+    "userId":"2502",
+    "weeklyData": [
+      { "day": "Mon", "usage": 3.5, "generation": 4.0 },
+      { "day": "Tue", "usage": 4.0, "generation": 4.5 },
+      { "day": "Wed", "usage": 3.8, "generation": 4.2 },
+      { "day": "Thu", "usage": 4.1, "generation": 4.7 },
+      { "day": "Fri", "usage": 4.0, "generation": 4.4 },
+      { "day": "Sat", "usage": 4.3, "generation": 4.9 },
+      { "day": "Sun", "usage": 4.5, "generation": 5.0 }
+    ]
+  },
+  {
+    "userId":"2503",
+    "weeklyData": [
+      { "day": "Mon", "usage": 5.0, "generation": 5.5 },
+      { "day": "Tue", "usage": 5.2, "generation": 5.8 },
+      { "day": "Wed", "usage": 5.1, "generation": 5.7 },
+      { "day": "Thu", "usage": 5.5, "generation": 6.0 },
+      { "day": "Fri", "usage": 5.3, "generation": 5.9 },
+      { "day": "Sat", "usage": 5.8, "generation": 6.2 },
+      { "day": "Sun", "usage": 6.0, "generation": 6.5 }
+    ]
+  },
+  {
+    "userId":"2504",
+    "weeklyData": [
+      { "day": "Mon", "usage": 5.0, "generation": 5.5 },
+      { "day": "Tue", "usage": 5.2, "generation": 5.8 },
+      { "day": "Wed", "usage": 5.1, "generation": 5.7 },
+      { "day": "Thu", "usage": 5.5, "generation": 6.0 },
+      { "day": "Fri", "usage": 5.3, "generation": 5.9 },
+      { "day": "Sat", "usage": 5.8, "generation": 6.2 },
+      { "day": "Sun", "usage": 6.0, "generation": 6.5 }
+    ]
+  },
+  {
+    "userId":"2505",
+    "weeklyData": [
+      { "day": "Mon", "usage": 5.0, "generation": 5.5 },
+      { "day": "Tue", "usage": 5.2, "generation": 5.8 },
+      { "day": "Wed", "usage": 5.1, "generation": 5.7 },
+      { "day": "Thu", "usage": 5.5, "generation": 6.0 },
+      { "day": "Fri", "usage": 5.3, "generation": 5.9 },
+      { "day": "Sat", "usage": 5.8, "generation": 6.2 },
+      { "day": "Sun", "usage": 6.0, "generation": 6.5 }
+    ]
+  }
+]
