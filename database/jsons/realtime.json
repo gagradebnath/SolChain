@@ -1,0 +1,72 @@
+[
+  {
+    "userId": "2501",
+    "timestamp": "2025-08-25T10:00:00Z",
+    "production": 5.2,
+    "available": 13,
+    "onMarket": 9,
+    "consumption": 3.1,
+    "gridFeedIn": 2.1,
+    "batteryCharge": 0.5,
+    "solarPanelTemp": 45,
+    "panelEfficiency": 92,
+    "inverterStatus": "Online",
+    "gridPrice": 0.25
+  },
+  {
+    "userId": "2502",
+    "timestamp": "2025-08-25T10:00:00Z",
+    "production": 4,
+    "available": 1.2,
+    "onMarket": 8,
+    "consumption": 2.8,
+    "gridFeedIn": 1.2,
+    "batteryCharge": 0.3,
+    "solarPanelTemp": 42,
+    "panelEfficiency": 90,
+    "inverterStatus": "Online",
+    "gridPrice": 0.25
+  },
+  {
+    "userId": "2503",
+    "timestamp": "2025-08-25T10:00:00Z",
+    "production": 4,
+    "available": 5.6,
+    "onMarket": 7,
+    "consumption": 2.8,
+    "gridFeedIn": 1.2,
+    "batteryCharge": 0.3,
+    "solarPanelTemp": 42,
+    "panelEfficiency": 90,
+    "inverterStatus": "Online",
+    "gridPrice": 0.25
+  },
+  {
+    "userId": "2504",
+    "timestamp": "2025-08-25T10:00:00Z",
+    "production": 4,
+    "available": 11.2,
+    "onMarket": 4,
+    "consumption": 2.8,
+    "gridFeedIn": 1.2,
+    "batteryCharge": 0.3,
+    "solarPanelTemp": 42,
+    "panelEfficiency": 90,
+    "inverterStatus": "Online",
+    "gridPrice": 0.25
+  },
+  {
+    "userId": "2505",
+    "timestamp": "2025-08-25T10:00:00Z",
+    "production": 4,
+    "available": 15,
+    "onMarket": 5,
+    "consumption": 2.8,
+    "gridFeedIn": 1.2,
+    "batteryCharge": 0.3,
+    "solarPanelTemp": 42,
+    "panelEfficiency": 90,
+    "inverterStatus": "Online",
+    "gridPrice": 0.25
+  }
+]

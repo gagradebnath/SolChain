@@ -144,15 +144,50 @@ export default function EnergyDashboardScreen() {
     );
     
     // Placeholder for a chart component
-    const renderProductionChart = () => (
+    // Placeholder for a chart component
+const renderProductionChart = () => {
+    // Safely get the data array based on the selected timeframe
+    const dataArray = energyData.historical[timeframe] || [];
+    
+    // Define a maximum height for the bars in pixels
+    const MAX_CHART_HEIGHT = 150; 
+    
+    // Find the maximum value in the data for scaling
+    const maxDataValue = dataArray.length > 0 ? Math.max(...dataArray) : 1; 
+
+    // Handle case where maxDataValue is 0 to avoid division by zero
+    const scaleFactor = maxDataValue > 0 ? MAX_CHART_HEIGHT / maxDataValue : 0; 
+    
+    return (
         <View style={styles.chartContainer}>
-            <Text style={styles.chartTitle}>{t.production} ({timeframe})</Text>
+            <Text style={styles.chartTitle}>{t.production} ({t[timeframe]})</Text>
             <View style={styles.chartPlaceholder}>
-                {/* In a real app, you would use a library like react-native-svg-charts here */}
-                <Text style={styles.chartPlaceholderText}>[Production Chart Placeholder]</Text>
+                {dataArray.length === 0 ? (
+                    <Text style={styles.chartPlaceholderText}>No data available</Text>
+                ) : (
+                    // Map over the data to render the bars
+                    dataArray.map((value, index) => {
+                        // Calculate bar height based on the scale factor
+                        const barHeight = value * scaleFactor;
+                        return (
+                            <View 
+                                // Use a unique key for each item in the array map
+                                key={`${timeframe}-${index}`} 
+                                style={{
+                                    width: 20, // Fixed width for the bar
+                                    height: barHeight > 0 ? barHeight : 1, // Ensure a minimum height if value is 0
+                                    backgroundColor: "#4CAF50", // Green color for production
+                                    marginHorizontal: 2, // Spacing between bars
+                                    alignSelf: 'flex-end', // Align bars to the bottom of the container
+                                }}
+                            />
+                        );
+                    })
+                )}
             </View>
         </View>
     );
+};
     
     const renderEnergyFlowDiagram = () => (
         <View style={[styles.card, styles.cardShadow]}>

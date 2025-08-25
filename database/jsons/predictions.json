@@ -1,0 +1,47 @@
+[
+  {
+    "userId": "2501",
+    "nextHourProduction": 2.1,
+    "peakTime": "14:30",
+    "predictedDayProduction": 25.5,
+    "predictedWeekProduction": [24, 26, 25, 27, 28, 26, 25],
+    "recommendedSellPrice": 0.26,
+    "energyStorageOptimization": "Charge battery to 90%"
+  },
+  {
+    "userId": "2502",
+    "nextHourProduction": 1.8,
+    "peakTime": "15:00",
+    "predictedDayProduction": 20.3,
+    "predictedWeekProduction": [19, 21, 20, 22, 21, 20, 19],
+    "recommendedSellPrice": 0.25,
+    "energyStorageOptimization": "Discharge battery to 50%"
+  },
+  {
+    "userId": "2503",
+    "nextHourProduction": 1.8,
+    "peakTime": "15:00",
+    "predictedDayProduction": 20.3,
+    "predictedWeekProduction": [19, 21, 20, 22, 21, 20, 19],
+    "recommendedSellPrice": 0.25,
+    "energyStorageOptimization": "Discharge battery to 50%"
+  },
+  {
+    "userId": "2504",
+    "nextHourProduction": 2.1,
+    "peakTime": "14:30",
+    "predictedDayProduction": 25.5,
+    "predictedWeekProduction": [24, 26, 25, 27, 28, 26, 25],
+    "recommendedSellPrice": 0.26,
+    "energyStorageOptimization": "Charge battery to 90%"
+  },
+  {
+    "userId": "2505",
+    "nextHourProduction": 1.8,
+    "peakTime": "15:00",
+    "predictedDayProduction": 20.3,
+    "predictedWeekProduction": [19, 21, 20, 22, 21, 20, 19],
+    "recommendedSellPrice": 0.25,
+    "energyStorageOptimization": "Discharge battery to 50%"
+  }
+]

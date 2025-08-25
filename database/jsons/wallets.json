@@ -1,0 +1,42 @@
+[
+  {
+    "id": "w2501",
+    "userId": "2501",
+    "address": "0x123...",
+    "balance": 5001.16,
+    "currency": "SOL",
+    "energyCredits": 9995
+  },
+  {
+    "id": "w2502",
+    "userId": "2502",
+    "address": "0x456...",
+    "balance": 5000,
+    "currency": "SOL",
+    "energyCredits": 10000
+  },
+  {
+    "id": "w2503",
+    "userId": "2503",
+    "address": "0x789...",
+    "balance": 5000,
+    "currency": "SOL",
+    "energyCredits": 10000
+  },
+  {
+    "id": "w2504",
+    "userId": "2504",
+    "address": "0x789...",
+    "balance": 5000,
+    "currency": "SOL",
+    "energyCredits": 10000
+  },
+  {
+    "id": "w2505",
+    "userId": "2505",
+    "address": "0x789...",
+    "balance": 4998.84,
+    "currency": "SOL",
+    "energyCredits": 10005
+  }
+]
