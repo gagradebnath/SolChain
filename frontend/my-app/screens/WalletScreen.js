@@ -58,7 +58,7 @@ const getIconForType = (type) => {
         case 'buy': return 'arrow-down-left';
         case 'sell': return 'arrow-up-right';
         case 'staking': return 'zap';
-        case 'carbon_credit': return 'leaf';
+        case 'carbon_credit': return 'award'; // Changed from 'leaf' to 'award'
         default: return 'info';
     }
 };
@@ -119,24 +119,6 @@ export default function WalletScreen() {
             </SafeAreaView>
         );
     }
-
-    const renderTransactionItem = ({ item }) => (
-        <View style={styles.transactionCard}>
-            <Feather
-                name={getIconForType(item.type)}
-                size={24}
-                color={getTxColor(item.type)}
-            />
-            <View style={styles.transactionDetails}>
-                <Text style={styles.transactionDescription}>{item.description}</Text>
-                <Text style={styles.transactionAmount}>{item.amount}</Text>
-            </View>
-            <View style={styles.transactionValueContainer}>
-                <Text style={[styles.transactionValue, { color: getTxColor(item.type) }]}>{item.value}</Text>
-                <Text style={styles.transactionTimestamp}>{item.timestamp}</Text>
-            </View>
-        </View>
-    );
 
     const ActionButton = ({ icon, text, onPress }) => (
         <TouchableOpacity style={styles.actionButton} onPress={onPress}>

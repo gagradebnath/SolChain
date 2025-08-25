@@ -177,6 +177,7 @@ export default function NotificationScreen() {
 
     const flatListData = groupNotificationsByDate(notifications);
 
+  
     if (!isLoaded) {
         return (
             <SafeAreaView style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
