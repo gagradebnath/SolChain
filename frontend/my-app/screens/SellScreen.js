@@ -10,9 +10,11 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, TextInput, Alert, Switch } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Feather } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import UniversalSafeArea from '../components/UniversalSafeArea';
 import UniversalScrollContainer from '../components/UniversalScrollContainer';
 import styles from '../styles/BuySellScreenStyles.js';
+import config from '../assets/config';
 
 // Dummy data for market demand
 const DUMMY_DEMAND = {
@@ -36,6 +38,7 @@ const translations = {
     listingSuccessful: "Listing Successful",
     listingMessage: "Your energy is now listed for sale!",
     enterDetails: "Please enter a valid amount and price.",
+    oops: "Oops!",
     languageToggle: "EN → BN"
   },
   bn: {
@@ -51,6 +54,7 @@ const translations = {
     listingSuccessful: "তালিকা সফল হয়েছে",
     listingMessage: "আপনার শক্তি এখন বিক্রির জন্য তালিকাভুক্ত করা হয়েছে!",
     enterDetails: "অনুগ্রহ করে একটি বৈধ পরিমাণ এবং মূল্য লিখুন।",
+    oops: "দুঃখিত!",
     languageToggle: "BN → EN"
   },
 };
@@ -60,8 +64,9 @@ export default function SellEnergyScreen() {
   const [price, setPrice] = useState('');
   const [amount, setAmount] = useState('');
   const [useMarketRate, setUseMarketRate] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSellEnergy = () => {
+  const handleSellEnergy = async () => {
     const finalPrice = useMarketRate ? DUMMY_MARKET_RATE : price;
 
     if (!amount || (finalPrice === '' && !useMarketRate)) {
@@ -69,14 +74,47 @@ export default function SellEnergyScreen() {
       return;
     }
 
-    console.log(`Listing ${amount} kWh at ${finalPrice} SOL/kWh`);
+    setIsSubmitting(true);
 
-    Alert.alert(translations[language].listingSuccessful, translations[language].listingMessage);
+    try {
+      const token = await AsyncStorage.getItem('token');
+      
+      const response = await fetch(`${config.API_BASE_URL}/energy/sell`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          energyAmount: amount,
+          pricePerKwh: finalPrice,
+          duration: 24, // Default 24 hours
+          location: 'Grid-Zone-A', // Default location
+          energySource: 'Solar' // Default energy source
+        }),
+      });
 
-    // Reset fields after submission
-    setPrice('');
-    setAmount('');
-    setUseMarketRate(false);
+      const data = await response.json();
+
+      if (data.success) {
+        Alert.alert(
+          translations[language].listingSuccessful, 
+          `${translations[language].listingMessage}\n\nTransaction Hash: ${data.data.transactionHash?.substring(0, 10)}...`
+        );
+
+        // Reset fields after successful submission
+        setPrice('');
+        setAmount('');
+        setUseMarketRate(false);
+      } else {
+        Alert.alert("Error", data.error || "Failed to create sell offer");
+      }
+    } catch (error) {
+      console.error("Error creating sell offer:", error);
+      Alert.alert("Error", "Failed to create sell offer. Check your network connection.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -144,10 +182,13 @@ export default function SellEnergyScreen() {
         </View>
 
         <TouchableOpacity
-          style={styles.buySellButton}
+          style={[styles.buySellButton, { opacity: isSubmitting ? 0.7 : 1 }]}
           onPress={handleSellEnergy}
+          disabled={isSubmitting}
         >
-          <Text style={styles.buySellButtonText}>{translations[language].sellNow}</Text>
+          <Text style={styles.buySellButtonText}>
+            {isSubmitting ? "Creating Offer..." : translations[language].sellNow}
+          </Text>
         </TouchableOpacity>
       </UniversalScrollContainer>
     </UniversalSafeArea>

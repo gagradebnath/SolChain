@@ -137,4 +137,53 @@ router.post("/accept", authenticateToken, async (req, res) => {
   }
 });
 
+// Execute energy purchase
+router.post("/offer", authenticateToken, async (req, res) => {
+  try {
+    const user = req.user;
+    const { offerId, energyAmount } = req.body;
+
+    console.log(`User ${user.id} attempting to buy ${energyAmount} kWh from offer ${offerId}`);
+
+    // Validate input
+    if (!offerId || !energyAmount) {
+      return res.status(400).json({
+        success: false,
+        error: "Offer ID and energy amount are required"
+      });
+    }
+
+    // Execute the purchase on blockchain
+    const purchaseResult = await blockchainService.acceptOffer(
+      user.id.toString(),
+      offerId,
+      energyAmount.toString()
+    );
+
+    if (purchaseResult.success) {
+      res.json({
+        success: true,
+        data: {
+          message: "Energy purchase completed successfully",
+          transactionHash: purchaseResult.data.transactionHash,
+          blockNumber: purchaseResult.data.blockNumber,
+          offerId,
+          energyAmount
+        }
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        error: "Failed to execute purchase: " + purchaseResult.error
+      });
+    }
+  } catch (error) {
+    console.error("❌ Buy offer error:", error.message);
+    res.status(500).json({
+      success: false,
+      error: "Internal server error"
+    });
+  }
+});
+
 module.exports = router;

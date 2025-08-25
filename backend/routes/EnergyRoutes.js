@@ -178,6 +178,65 @@ router.post("/sell", authenticateToken, async (req, res) => {
   }
 });
 
+// Create sell energy offer endpoint
+router.post("/sell", authenticateToken, async (req, res) => {
+  try {
+    const user = req.user;
+    const { energyAmount, pricePerKwh, duration, location, energySource } = req.body;
+
+    console.log(`Creating sell offer for user ${user.id}:`, {
+      energyAmount,
+      pricePerKwh,
+      duration,
+      location,
+      energySource
+    });
+
+    // Validate input
+    if (!energyAmount || !pricePerKwh) {
+      return res.status(400).json({
+        success: false,
+        error: "Energy amount and price per kWh are required"
+      });
+    }
+
+    // Create sell offer on blockchain
+    const offerResult = await blockchainService.createSellOffer(user.id.toString(), {
+      energyAmount: energyAmount.toString(),
+      pricePerKwh: pricePerKwh.toString(),
+      duration: duration || 24,
+      location: location || "Grid-Zone-A",
+      energySource: energySource || "Solar"
+    });
+
+    if (offerResult.success) {
+      res.json({
+        success: true,
+        data: {
+          message: "Energy offer created successfully",
+          transactionHash: offerResult.data.transactionHash,
+          blockNumber: offerResult.data.blockNumber,
+          energyAmount,
+          pricePerKwh,
+          location: location || "Grid-Zone-A",
+          energySource: energySource || "Solar"
+        }
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        error: "Failed to create sell offer: " + offerResult.error
+      });
+    }
+  } catch (error) {
+    console.error("❌ Sell energy error:", error.message);
+    res.status(500).json({
+      success: false,
+      error: "Internal server error"
+    });
+  }
+});
+
 // Get system statistics
 router.get("/stats", authenticateToken, async (req, res) => {
   try {
