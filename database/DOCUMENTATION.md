@@ -1,148 +1,196 @@
-# SolChain Backend JSON Database Documentation
+# SolChain Database JSONs Documentation
 
-This document explains how the backend uses JSON files in `database/jsons/`, what data each file contains, and how to use them in your backend routes.
-
----
-
-## Overview
-
-The backend stores and retrieves persistent data using JSON files located in `database/jsons/`. Each file represents a specific data entity or feature of the platform. Backend routes read from and write to these files to serve API requests.
+This document describes the structure and purpose of each JSON file inside `database/jsons/` for the SolChain backend.  
+These files are used to store and retrieve persistent data for users, energy metrics, transactions, predictions, and more.
 
 ---
+## Password Policy
+
+- **All users in the sample data have the password:** `1234`
+- The `passwordHash` in `users.json` is a bcrypt hash of `1234`.
 
 ## JSON Files and Their Data
 
-### 1. `energyOverview.json`
-- **Purpose:** Stores daily or current energy production, consumption, and savings for each user.
-- **Sample Data:**
-  ```json
-  [
-    {
-      "userId": "user1",
-      "production": "5.2 kWh",
-      "consumption": "3.1 kWh",
-      "savings": "৳15.75"
-    }
-  ]
-  ```
+### 1. `activity.json`
+- **Purpose:** Logs recent activities for each user, such as transactions, notifications, or system events.
+- **Typical Fields:**  
+  - `id`: Unique activity identifier  
+  - `userId`: User associated with the activity  
+  - `type`: Activity type (e.g., "transaction", "notification")  
+  - `description`: Description of the activity  
+  - `timestamp`: When the activity occurred  
+  - `value`: Value or amount involved (if applicable)
 - **Usage:**  
-  - Read to display energy metrics on the dashboard.
-  - Update when new energy data is recorded.
+  - Display user activity feeds or notifications in the frontend.
 
 ---
 
-### 2. `recentActivity.json`
-- **Purpose:** Logs recent activities for each user, such as transactions and notifications.
-- **Sample Data:**
-  ```json
-  [
-    {
-      "id": "1",
-      "userId": "user1",
-      "type": "transaction",
-      "description": "Sold 0.5 kWh to Grid",
-      "timestamp": "10:30 AM",
-      "value": "+0.5 SOL"
-    }
-  ]
-  ```
+### 2. `battery.json`
+- **Purpose:** Stores battery status and metrics for users or devices.
+- **Typical Fields:**  
+  - `userId` or `deviceId`: Owner or device reference  
+  - `chargeLevel`: Current battery charge (percentage or kWh)  
+  - `status`: Charging/discharging/idle  
+  - `lastUpdated`: Timestamp of last update
 - **Usage:**  
-  - Read to show recent activity on the dashboard.
-  - Append new activities after transactions or system events.
+  - Monitor battery health and status in dashboards.
 
 ---
 
-### 3. `weather.json`
-- **Purpose:** Stores weather information for locations relevant to users.
-- **Sample Data:**
-  ```json
-  [
-    {
-      "location": "Dhaka, Bangladesh",
-      "condition": "Partly Cloudy",
-      "temperature": "32°C",
-      "icon": "cloud"
-    }
-  ]
-  ```
+### 3. `carbon.json`
+- **Purpose:** Tracks carbon emissions or savings for users or the system.
+- **Typical Fields:**  
+  - `userId`: User reference  
+  - `emissions`: Amount of carbon emitted (kg CO₂)  
+  - `savings`: Amount of carbon saved (kg CO₂)  
+  - `timestamp` or `date`: When the data was recorded
 - **Usage:**  
-  - Read to display weather on the dashboard.
-  - Update periodically from a weather API.
+  - Display environmental impact and sustainability metrics.
 
 ---
 
-### 4. `marketPrices.json` (or `market.json`)
-- **Purpose:** Stores current buy and sell prices for energy tokens.
-- **Sample Data:**
-  ```json
-  [
-    {
-      "date": "2024-08-25",
-      "buy": "0.25 SOL/kWh",
-      "sell": "0.20 SOL/kWh"
-    }
-  ]
-  ```
+### 4. `energyData.json`
+- **Purpose:** Stores energy production, consumption, and savings per user or device, often per day.
+- **Typical Fields:**  
+  - `userId` or `deviceId`  
+  - `date`  
+  - `production`: Energy produced (kWh)  
+  - `consumption`: Energy consumed (kWh)  
+  - `savings`: Money or energy saved
 - **Usage:**  
-  - Read to show market prices on the dashboard.
-  - Update when market rates change.
+  - Power dashboards and analytics for energy usage.
 
 ---
 
-### 5. `goals.json`
-- **Purpose:** Stores user goals and their progress.
-- **Sample Data:**
-  ```json
-  [
-    {
-      "userId": "user1",
-      "goals": [
-        { "id": "1", "title": "Reduce Consumption", "target": "20%", "progress": 65 },
-        { "id": "2", "title": "Earn SOL", "target": "100 SOL", "progress": 40 }
-      ]
-    }
-  ]
-  ```
+### 5. `grid.json`
+- **Purpose:** Contains data about grid status, grid transactions, or grid-level energy flows.
+- **Typical Fields:**  
+  - `gridId`  
+  - `status`: Online/offline/maintenance  
+  - `energyIn`: Energy supplied to grid  
+  - `energyOut`: Energy drawn from grid  
+  - `timestamp`
 - **Usage:**  
-  - Read to display user goals on the dashboard.
-  - Update as users make progress or set new goals.
+  - Monitor and analyze grid interactions.
 
 ---
 
-## How Backend Uses These JSON Files
+### 6. `market.json`
+- **Purpose:** Stores current and historical buy/sell prices for energy tokens or units.
+- **Typical Fields:**  
+  - `date`  
+  - `buy`: Buy price (e.g., SOL/kWh)  
+  - `sell`: Sell price  
+  - `unit`: Unit of trade
+- **Usage:**  
+  - Display market prices and trends in the frontend.
+
+---
+
+### 7. `predictions.json`
+- **Purpose:** Contains ML or statistical predictions, such as future energy usage, prices, or production.
+- **Typical Fields:**  
+  - `userId` or `deviceId`  
+  - `date` or `timestamp`  
+  - `predictedConsumption`  
+  - `predictedProduction`  
+  - `predictedPrice`
+- **Usage:**  
+  - Show forecasts and recommendations to users.
+
+---
+
+### 8. `realtime.json`
+- **Purpose:** Stores real-time sensor or device data, such as live energy flows or IoT readings.
+- **Typical Fields:**  
+  - `deviceId` or `userId`  
+  - `timestamp`  
+  - `currentProduction`  
+  - `currentConsumption`  
+  - `voltage`, `current`, etc.
+- **Usage:**  
+  - Power live dashboards and alerts.
+
+---
+
+### 9. `transactions.json`
+- **Purpose:** Records all energy and token transactions between users, devices, or the grid.
+- **Typical Fields:**  
+  - `id`: Transaction ID  
+  - `from`: Sender (userId or walletId)  
+  - `to`: Receiver  
+  - `amount`: Amount transferred  
+  - `unit`: kWh, SOL, etc.  
+  - `timestamp`  
+  - `type`: Transaction type (buy/sell/transfer)
+- **Usage:**  
+  - Display transaction history and analytics.
+
+---
+
+### 10. `usage.json`
+- **Purpose:** Tracks detailed energy usage data, possibly at a finer granularity than `energyData.json`.
+- **Typical Fields:**  
+  - `userId` or `deviceId`  
+  - `timestamp` or `interval`  
+  - `usage`: Energy used (kWh)
+- **Usage:**  
+  - Detailed usage analytics and reporting.
+
+---
+
+### 11. `users.json`
+- **Purpose:** Stores user authentication, profile information, and user-specific data such as goals.
+- **Typical Fields:**  
+  - `id`: User ID  
+  - `username`  
+  - `email`  
+  - `passwordHash`: bcrypt hash of the password (all users use password `1234` in sample data)  
+  - `goals`: Array of user goals (see dashboard)
+- **Usage:**  
+  - User authentication, profile management, and dashboard personalization.
+
+---
+
+### 12. `wallets.json`
+- **Purpose:** Stores wallet addresses, balances, and related info for each user.
+- **Typical Fields:**  
+  - `id`: Wallet ID  
+  - `userId`: Owner  
+  - `address`: Blockchain address  
+  - `balance`: Current balance  
+  - `currency`: e.g., SOL
+- **Usage:**  
+  - Manage and display user wallets and balances.
+
+---
+
+## How to Use These JSONs
 
 - **Reading Data:**  
-  Use Node.js `fs` module to read JSON files and parse them into JavaScript objects for use in route handlers.
+  Use Node.js `fs` module to read and parse JSON files in your backend routes.
   ```js
   const fs = require('fs');
-  const data = JSON.parse(fs.readFileSync('database/jsons/energyOverview.json'));
+  const path = require('path');
+  const data = JSON.parse(fs.readFileSync(path.join(__dirname, 'database/jsons/energyData.json')));
   ```
-
 - **Writing Data:**  
-  Update or append data, then write back to the file.
+  Update the JS object and write back to the file.
   ```js
-  fs.writeFileSync('database/jsons/energyOverview.json', JSON.stringify(data, null, 2));
+  fs.writeFileSync(path.join(__dirname, 'database/jsons/energyData.json'), JSON.stringify(data, null, 2));
   ```
-
-- **Example in a Route:**  
-  In `routes/HomeScreen.js`, you might aggregate data from all these JSONs to build the dashboard response.
-
----
-
-## Best Practices
-
-- Always read the latest data from the file before responding to API requests.
-- When writing, ensure you do not overwrite concurrent updates (consider using file locks or a database for production).
-- Validate data before saving to maintain consistency.
+- **Best Practices:**  
+  - Always read the latest data before responding to API requests.
+  - Validate data before saving.
+  - For production, consider migrating to a real database for scalability and concurrency.
 
 ---
 
-## Extending
+## Password Policy
 
-To add new features:
-- Create a new JSON file for the data entity.
-- Update your route handlers to read/write this file as needed.
+- **All users in the sample data have the password:** `1234`
+- The `passwordHash` in `users.json` is a bcrypt hash of `1234`.
 
 ---
 
-**This approach is suitable for prototyping and small-scale deployments. For production, consider migrating to
+**This documentation covers all JSON files in `database/jsons/` as of the current repository structure.**
