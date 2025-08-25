@@ -19,10 +19,12 @@ class SolChainAPI {
             chainId: config.chainId || 1337,
             privateKey: config.privateKey,
             contractAddresses: config.contractAddresses || {},
-            gasLimit: config.gasLimit || 3000000,
             gasPrice: config.gasPrice || "20000000000", // 20 gwei
-            ...config
+            ...config,
         };
+        
+        // Ensure gasLimit is always a number (must be done after spread to override any config.gasLimit)
+        this.config.gasLimit = Number(this.config.gasLimit) || 3000000;
 
         this.provider = null;
         this.signer = null;
@@ -203,6 +205,7 @@ class SolChainAPI {
             }
             
             const address = await this.signer.getAddress();
+            // Always get fresh nonce from network to avoid conflicts
             const networkNonce = await this.provider.getTransactionCount(address, "pending");
             
             // Use the higher of network nonce or our tracked nonce
@@ -210,7 +213,12 @@ class SolChainAPI {
                 this.currentNonce = networkNonce;
             }
             
-            return this.currentNonce++;
+            const nonceToUse = this.currentNonce;
+            this.currentNonce++;
+            
+            console.log(`🔢 Using nonce: ${nonceToUse} (network: ${networkNonce}, tracked: ${this.currentNonce})`);
+            
+            return nonceToUse;
         } catch (error) {
             throw new Error(`Failed to get nonce: ${error.message}`);
         }
@@ -400,10 +408,24 @@ class SolChainAPI {
                 throw new Error("SolarToken contract not initialized");
             }
 
-            const amountWei = ethers.parseEther(amount.toString());
-            const tx = await this.contracts.SolarToken.mint(toAddress, amountWei, {
-                gasLimit: this.config.gasLimit
+            console.log("🔍 Debug - mintTokens config:", {
+                gasLimit: this.config.gasLimit,
+                gasLimitType: typeof this.config.gasLimit,
+                fullConfig: JSON.stringify(this.config, null, 2)
             });
+
+            const amountWei = ethers.parseEther(amount.toString());
+            const nonce = await this.getNextNonce();
+            
+            const tx = await this.contracts.SolarToken.mint(
+                toAddress, 
+                amountWei, 
+                "Energy production reward", // Add required reason parameter
+                {
+                    gasLimit: this.config.gasLimit,
+                    nonce: nonce
+                }
+            );
 
             const receipt = await tx.wait();
             
@@ -414,7 +436,8 @@ class SolChainAPI {
                     blockNumber: receipt.blockNumber,
                     gasUsed: receipt.gasUsed.toString(),
                     to: toAddress,
-                    amount: amount.toString()
+                    amount: amount.toString(),
+                    nonce: nonce
                 }
             };
         } catch (error) {
@@ -621,24 +644,49 @@ class SolChainAPI {
 
             const offers = await this.contracts.EnergyTrading.getActiveOffers(offset, limit);
             
-            const formattedOffers = offers.map(offer => ({
-                offerId: offer.offerId.toString(),
-                offerType: offer.offerType === 0 ? "SELL" : "BUY",
-                creator: offer.creator,
-                energyAmount: ethers.formatEther(offer.energyAmount),
-                pricePerKwh: ethers.formatEther(offer.pricePerKwh),
-                deadline: new Date(Number(offer.deadline) * 1000).toISOString(),
-                location: offer.location,
-                energySource: offer.energySource,
-                isActive: offer.isActive
-            }));
+            console.log(`🔍 Retrieved ${offers.length} active offers from blockchain`);
+            
+            if (offers.length === 0) {
+                return {
+                    success: true,
+                    data: {
+                        offers: [],
+                        offset,
+                        limit,
+                        count: 0
+                    }
+                };
+            }
+            
+            const formattedOffers = offers.map((offer, index) => {
+                try {
+                    return {
+                        offerId: offer.id.toString(),
+                        offerType: offer.offerType === 0 ? "SELL" : "BUY",
+                        creator: offer.creator,
+                        energyAmount: ethers.formatEther(offer.energyAmount),
+                        pricePerKwh: ethers.formatEther(offer.pricePerKwh),
+                        totalPrice: ethers.formatEther(offer.totalPrice),
+                        deadline: new Date(Number(offer.deadline) * 1000).toISOString(),
+                        location: offer.location,
+                        energySource: offer.energySource,
+                        status: offer.status === 0 ? "ACTIVE" : offer.status === 1 ? "CANCELLED" : offer.status === 2 ? "EXECUTED" : "DISPUTED",
+                        createdAt: new Date(Number(offer.createdAt) * 1000).toISOString()
+                    };
+                } catch (error) {
+                    console.error(`❌ Error formatting offer ${index}:`, error.message);
+                    console.error('Offer data:', offer);
+                    throw error;
+                }
+            });
 
             return {
                 success: true,
                 data: {
                     offers: formattedOffers,
                     offset,
-                    limit
+                    limit,
+                    count: formattedOffers.length
                 }
             };
         } catch (error) {

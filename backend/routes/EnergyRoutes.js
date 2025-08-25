@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
+const blockchainService = require("../services/blockchainService");
 
 const DUMMY_DATA = {
     realTimeMetrics: {
@@ -59,15 +60,149 @@ function authenticateToken(req, res, next) {
   }
 }
 
-router.get("/", authenticateToken, (req, res) => {
-  const user = req.user;
-  console.log("Authenticated user for energy screen:", user);
+router.get("/", authenticateToken, async (req, res) => {
+  try {
+    const user = req.user;
+    console.log("Fetching energy data for user:", user.id);
 
-  res.json({
-    success: true,
-    data: DUMMY_DATA,
-  });
+    // Get current energy price from blockchain oracle
+    const priceResult = await blockchainService.getCurrentEnergyPrice();
+    const currentPrice = priceResult.success ? priceResult.data.price : "0.25";
 
+    // Combine real blockchain data with mock sensor data
+    const energyData = {
+      ...DUMMY_DATA,
+      blockchain: {
+        currentEnergyPrice: currentPrice,
+        userAddress: blockchainService.getUserAddress(user.id.toString()),
+        isConnected: blockchainService.isInitialized
+      }
+    };
+
+    res.json({
+      success: true,
+      data: energyData,
+    });
+  } catch (error) {
+    console.error("❌ Energy route error:", error.message);
+    res.json({
+      success: true,
+      data: DUMMY_DATA, // Fallback to dummy data
+    });
+  }
+});
+
+// Record energy production endpoint
+router.post("/production", authenticateToken, async (req, res) => {
+  try {
+    const user = req.user;
+    const { energyProduced, timestamp } = req.body;
+
+    if (!energyProduced) {
+      return res.status(400).json({
+        success: false,
+        error: "energyProduced is required"
+      });
+    }
+
+    console.log(`Recording energy production for user ${user.id}: ${energyProduced} kWh`);
+
+    // Mint tokens for energy production
+    const mintResult = await blockchainService.mintTokensForProduction(
+      user.id.toString(),
+      energyProduced.toString()
+    );
+    
+    if (mintResult.success) {
+      res.json({
+        success: true,
+        transaction: mintResult.data,
+        message: `Successfully recorded ${energyProduced} kWh production and minted ${energyProduced} ST`
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        error: "Failed to record production: " + mintResult.error
+      });
+    }
+  } catch (error) {
+    console.error("❌ Production recording error:", error.message);
+    res.status(500).json({
+      success: false,
+      error: "Internal server error"
+    });
+  }
+});
+
+// Create sell offer endpoint
+router.post("/sell", authenticateToken, async (req, res) => {
+  try {
+    const user = req.user;
+    const { energyAmount, pricePerKwh, duration, location, energySource } = req.body;
+
+    if (!energyAmount || !pricePerKwh) {
+      return res.status(400).json({
+        success: false,
+        error: "energyAmount and pricePerKwh are required"
+      });
+    }
+
+    console.log(`Creating sell offer for user ${user.id}: ${energyAmount} kWh at ${pricePerKwh} ST/kWh`);
+
+    const offerResult = await blockchainService.createSellOffer(user.id.toString(), {
+      energyAmount,
+      pricePerKwh,
+      duration: duration || 24,
+      location: location || "Grid-Zone-A",
+      energySource: energySource || "Solar"
+    });
+    
+    if (offerResult.success) {
+      res.json({
+        success: true,
+        offer: offerResult.data,
+        message: "Sell offer created successfully"
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        error: "Failed to create sell offer: " + offerResult.error
+      });
+    }
+  } catch (error) {
+    console.error("❌ Create sell offer error:", error.message);
+    res.status(500).json({
+      success: false,
+      error: "Internal server error"
+    });
+  }
+});
+
+// Get system statistics
+router.get("/stats", authenticateToken, async (req, res) => {
+  try {
+    console.log("Fetching system statistics from blockchain");
+
+    const statsResult = await blockchainService.getSystemStats();
+    
+    if (statsResult.success) {
+      res.json({
+        success: true,
+        data: statsResult.data
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        error: "Failed to fetch stats: " + statsResult.error
+      });
+    }
+  } catch (error) {
+    console.error("❌ Stats error:", error.message);
+    res.status(500).json({
+      success: false,
+      error: "Internal server error"
+    });
+  }
 });
 
 module.exports = router;

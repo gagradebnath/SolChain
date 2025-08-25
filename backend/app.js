@@ -24,5 +24,6 @@ app.use("/api/buy", require("./routes/buyRoutes"));
 app.use("/api/notifications", require("./routes/notificationRoutes"));
 app.use("/api/goals", require("./routes/goalsRoutes"));
 app.use("/api/settings", require("./routes/settingRoutes"));
+app.use("/api/transactions", require("./routes/transactionRoutes"));
 
 module.exports = app;
