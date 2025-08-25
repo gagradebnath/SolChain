@@ -58,7 +58,7 @@ const getIconForType = (type) => {
         case 'buy': return 'arrow-down-left';
         case 'sell': return 'arrow-up-right';
         case 'staking': return 'zap';
-        case 'carbon_credit': return 'award'; // Changed from 'leaf' to 'award'
+        case 'carbon_credit': return 'award';
         default: return 'info';
     }
 };
@@ -119,6 +119,26 @@ export default function WalletScreen() {
             </SafeAreaView>
         );
     }
+    
+    // --- CORRECTED renderTransactionItem ---
+    const renderTransactionItem = ({ item }) => (
+        <View style={styles.transactionItem}>
+            <Feather 
+                name={getIconForType(item.type)} 
+                size={20} 
+                color={getTxColor(item.type)} 
+                style={{ marginRight: 10 }}
+            />
+            <View style={{ flex: 1 }}>
+                <Text style={styles.transactionTitle}>{item.description}</Text>
+                <Text style={styles.transactionSubtitle}>{item.timestamp}</Text>
+            </View>
+            <Text style={[styles.transactionAmount, { color: getTxColor(item.type) }]}>
+                {item.value}
+            </Text>
+        </View>
+    );
+
 
     const ActionButton = ({ icon, text, onPress }) => (
         <TouchableOpacity style={styles.actionButton} onPress={onPress}>
@@ -218,12 +238,17 @@ export default function WalletScreen() {
 
                 {/* TransactionHistory */}
                 <Text style={styles.sectionTitle}>{t.transactions}</Text>
-                <FlatList
-                    data={transactionHistory}
-                    renderItem={renderTransactionItem}
-                    keyExtractor={item => item.id}
-                    scrollEnabled={false}
-                />
+                {transactionHistory.length > 0 ? (
+                    <FlatList
+                        data={transactionHistory}
+                        renderItem={renderTransactionItem}
+                        keyExtractor={item => item.id}
+                        scrollEnabled={false}
+                    />
+                ) : (
+                    <Text style={styles.noTransactionsText}>No transactions found.</Text>
+                )}
+
 
                 {/* Additional Functions as a separate settings section */}
                 <Text style={styles.sectionTitle}>More Options</Text>
