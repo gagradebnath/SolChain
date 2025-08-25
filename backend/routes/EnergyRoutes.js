@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
+const blockchainService = require("../services/BlockchainService");
 
 const DUMMY_DATA = {
     realTimeMetrics: {
@@ -67,7 +68,330 @@ router.get("/", authenticateToken, (req, res) => {
     success: true,
     data: DUMMY_DATA,
   });
+});
 
+// ========================================
+// BLOCKCHAIN INTEGRATED ROUTES
+// ========================================
+
+// Create blockchain wallet for user
+router.post("/wallet/create", authenticateToken, async (req, res) => {
+  try {
+    const result = await blockchainService.createUserWallet();
+    
+    if (result.success) {
+      res.json({
+        success: true,
+        message: "Blockchain wallet created successfully",
+        data: {
+          address: result.data.address,
+          // Don't send private key to frontend for security
+          publicKey: result.data.address
+        }
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        error: result.error
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: "Failed to create wallet: " + error.message
+    });
+  }
+});
+
+// Get user's energy token balance
+router.get("/balance/:walletAddress", authenticateToken, async (req, res) => {
+  try {
+    const { walletAddress } = req.params;
+    const result = await blockchainService.getUserBalance(walletAddress);
+    
+    if (result.success) {
+      res.json({
+        success: true,
+        data: {
+          balance: result.data.balance,
+          balanceFormatted: result.data.formatted,
+          walletAddress: walletAddress
+        }
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        error: result.error
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: "Failed to get balance: " + error.message
+    });
+  }
+});
+
+// Record energy production (mint tokens)
+router.post("/production/record", authenticateToken, async (req, res) => {
+  try {
+    const { walletAddress, energyProduced } = req.body;
+    
+    if (!walletAddress || !energyProduced) {
+      return res.status(400).json({
+        success: false,
+        error: "Wallet address and energy amount are required"
+      });
+    }
+
+    const result = await blockchainService.mintTokensForEnergyProduction(
+      walletAddress, 
+      energyProduced, 
+      "Solar Energy Production"
+    );
+    
+    if (result.success) {
+      res.json({
+        success: true,
+        message: `Successfully recorded ${energyProduced} kWh production`,
+        data: {
+          txHash: result.data.txHash,
+          tokensEarned: energyProduced,
+          walletAddress: walletAddress
+        }
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        error: result.error
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: "Failed to record production: " + error.message
+    });
+  }
+});
+
+// Create energy sell offer
+router.post("/trading/sell", authenticateToken, async (req, res) => {
+  try {
+    const { sellerPrivateKey, energyAmount, pricePerKwh, expiryHours, location, energyType } = req.body;
+    
+    if (!sellerPrivateKey || !energyAmount || !pricePerKwh) {
+      return res.status(400).json({
+        success: false,
+        error: "Seller private key, energy amount, and price are required"
+      });
+    }
+
+    const result = await blockchainService.createSellOffer(
+      sellerPrivateKey,
+      energyAmount,
+      pricePerKwh,
+      expiryHours || 24,
+      location || "Unknown",
+      energyType || "Solar"
+    );
+    
+    if (result.success) {
+      res.json({
+        success: true,
+        message: "Sell offer created successfully",
+        data: result.data
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        error: result.error
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: "Failed to create sell offer: " + error.message
+    });
+  }
+});
+
+// Create energy buy offer
+router.post("/trading/buy", authenticateToken, async (req, res) => {
+  try {
+    const { buyerPrivateKey, energyAmount, pricePerKwh, expiryHours, location, energyType } = req.body;
+    
+    if (!buyerPrivateKey || !energyAmount || !pricePerKwh) {
+      return res.status(400).json({
+        success: false,
+        error: "Buyer private key, energy amount, and price are required"
+      });
+    }
+
+    const result = await blockchainService.createBuyOffer(
+      buyerPrivateKey,
+      energyAmount,
+      pricePerKwh,
+      expiryHours || 24,
+      location || "Unknown",
+      energyType || "Any"
+    );
+    
+    if (result.success) {
+      res.json({
+        success: true,
+        message: "Buy offer created successfully",
+        data: result.data
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        error: result.error
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: "Failed to create buy offer: " + error.message
+    });
+  }
+});
+
+// Accept a trading offer
+router.post("/trading/accept/:offerId", authenticateToken, async (req, res) => {
+  try {
+    const { offerId } = req.params;
+    const { acceptorPrivateKey } = req.body;
+    
+    if (!acceptorPrivateKey) {
+      return res.status(400).json({
+        success: false,
+        error: "Acceptor private key is required"
+      });
+    }
+
+    const result = await blockchainService.acceptOffer(acceptorPrivateKey, parseInt(offerId));
+    
+    if (result.success) {
+      res.json({
+        success: true,
+        message: "Offer accepted successfully",
+        data: result.data
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        error: result.error
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: "Failed to accept offer: " + error.message
+    });
+  }
+});
+
+// Get all active trading offers
+router.get("/trading/offers", authenticateToken, async (req, res) => {
+  try {
+    const { offset = 0, limit = 10 } = req.query;
+    
+    const result = await blockchainService.getActiveOffers(parseInt(offset), parseInt(limit));
+    
+    if (result.success) {
+      res.json({
+        success: true,
+        data: result.data
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        error: result.error
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: "Failed to get offers: " + error.message
+    });
+  }
+});
+
+// Get trading statistics
+router.get("/trading/stats", authenticateToken, async (req, res) => {
+  try {
+    const result = await blockchainService.getTradingStats();
+    
+    if (result.success) {
+      res.json({
+        success: true,
+        data: result.data
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        error: result.error
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: "Failed to get trading stats: " + error.message
+    });
+  }
+});
+
+// Get account overview
+router.get("/account/:walletAddress", authenticateToken, async (req, res) => {
+  try {
+    const { walletAddress } = req.params;
+    
+    const result = await blockchainService.getAccountOverview(walletAddress);
+    
+    if (result.success) {
+      res.json({
+        success: true,
+        data: result.data
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        error: result.error
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: "Failed to get account overview: " + error.message
+    });
+  }
+});
+
+// Get blockchain system status
+router.get("/blockchain/status", authenticateToken, async (req, res) => {
+  try {
+    const result = await blockchainService.getSystemOverview();
+    
+    if (result.success) {
+      res.json({
+        success: true,
+        data: result.data,
+        blockchainConnected: blockchainService.isReady()
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        error: result.error,
+        blockchainConnected: false
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: "Failed to get blockchain status: " + error.message,
+      blockchainConnected: false
+    });
+  }
 });
 
 module.exports = router;
