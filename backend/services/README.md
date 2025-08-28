@@ -1,6 +1,6 @@
 # SolChain Backend Services
 
-This directory contains the core business logic services for the SolChain platform. These services act as an abstraction layer between the API routes and the underlying blockchain infrastructure, providing clean, reusable, and well-documented interfaces for all platform operations.
+This directory contains the core business logic services for the SolChain platform. These services act as an abstraction layer between the API routes and the SolChain blockchain layer, providing clean, reusable, and well-documented interfaces for wallets, tokens, energy trading, governance, compliance, and system stats.
 
 ## 📁 Directory Structure
 
@@ -18,19 +18,20 @@ services/
 
 ### BlockchainService (`blockchainService.js`)
 
-The primary service for all blockchain-related operations in the SolChain ecosystem.
+Primary service for all blockchain-related operations in SolChain.
 
-**Purpose**: Provides a high-level interface for interacting with SolChain smart contracts, managing user wallets, handling energy trading, and processing token operations.
+Purpose: High-level interface to SolChain smart contracts for wallet management, token ops, energy trading, governance, compliance, and price oracles.
 
-**Key Features**:
-- 🏦 **Wallet Management**: Create and manage user blockchain wallets
-- 🪙 **Token Operations**: Transfer, mint, and query SolarToken balances
-- ⚡ **Energy Trading**: P2P energy marketplace integration
-- 📊 **System Monitoring**: Blockchain statistics and health monitoring
-- 🔮 **Oracle Integration**: Real-time energy pricing data
-- 💾 **Transaction Tracking**: Comprehensive transaction history
+Key Features:
+- 🏦 Wallets: KYC-gated wallet creation, role assignment, deterministic address mapping (Hardhat accounts in dev)
+- 🪙 Tokens: Transfer, mint-for-production, balance queries
+- ⚡ Marketplace: Create buy/sell offers, fetch active offers, accept trades
+- 🗳️ Governance: Proposals, voting, validator registration
+- �️ Compliance & Security: Audit logs, compliance reports, RBAC, encryption helpers
+- 🔮 Oracle: Current energy price from on-chain oracle
+- � System: Network/contract stats, architecture overview
 
-**Architecture**:
+Architecture:
 ```
 Frontend Routes → BlockchainService → SolChainAPI → Smart Contracts
 ```
@@ -42,21 +43,29 @@ Frontend Routes → BlockchainService → SolChainAPI → Smart Contracts
 ```javascript
 const blockchainService = require('./services/blockchainService');
 
-// Service auto-initializes on require
-// Wait for initialization in async context
+// Auto-initializes on require; optionally wait until ready
 while (!blockchainService.isInitialized) {
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise(r => setTimeout(r, 100));
 }
 ```
 
 ### Basic Operations
 
-#### Create User Wallet
+#### Create User Wallet (with KYC and role)
 ```javascript
-const wallet = await blockchainService.createUserWallet('user123');
+const wallet = await blockchainService.createUserWallet('user123', {
+    kycData: {
+        verified: true,
+        authority: 'BREB',
+        document: 'NID'
+    },
+    role: 'prosumer',
+    privacySettings: { encryptMetadata: true, zeroKnowledge: false }
+});
 if (wallet.success) {
-    console.log('Wallet Address:', wallet.data.address);
-    console.log('Initial Balance:', wallet.data.balance);
+    console.log('Address:', wallet.data.address);
+    console.log('Role:', wallet.data.role);
+    console.log('Governance tokens:', wallet.data.governanceTokens);
 }
 ```
 
@@ -83,6 +92,22 @@ const offer = await blockchainService.createSellOffer('user123', {
 });
 ```
 
+#### Create Energy Buy Offer
+```javascript
+const bid = await blockchainService.createBuyOffer('buyer456', {
+    energyAmount: '50',
+    pricePerKwh: '0.10',
+    duration: 24,
+    location: 'Grid-Zone-A',
+    energySource: 'Any'
+});
+```
+
+#### Accept Offer (execute trade)
+```javascript
+const execTx = await blockchainService.acceptOffer('buyer456', 'offerId123', '25');
+```
+
 #### Get Marketplace Data
 ```javascript
 const offers = await blockchainService.getActiveOffers(0, 10);
@@ -90,34 +115,95 @@ const stats = await blockchainService.getSystemStats();
 const price = await blockchainService.getCurrentEnergyPrice();
 ```
 
+### Route ↔ Service mapping
+
+- `routes/WalletRoutes.js`
+    - GET `/wallet` → `getUserWallet`
+    - POST `/wallet/create` → `createUserWallet`
+    - POST `/wallet/transfer` → `transferTokens`
+- `routes/EnergyRoutes.js`
+    - GET `/energy` → `getCurrentEnergyPrice` (+ mock sensors)
+    - POST `/energy/production` → `mintTokensForProduction`
+    - POST `/energy/sell` → `createSellOffer`
+    - GET `/energy/stats` → `getSystemStats`
+- `routes/buyRoutes.js`
+    - GET `/buy` → `getActiveOffers`
+    - POST `/buy/offer` → `createBuyOffer` or `acceptOffer` (two handlers exist)
+
 ## 📊 API Reference
 
 ### BlockchainService Methods
 
-| Method | Description | Parameters | Returns |
-|--------|-------------|------------|---------|
-| `createUserWallet(userId)` | Create new blockchain wallet | `userId: string` | `Promise<WalletResult>` |
-| `getUserWallet(userId)` | Get wallet data and balances | `userId: string` | `Promise<WalletData>` |
-| `getUserAddress(userId)` | Get user's blockchain address | `userId: string` | `string` |
-| `transferTokens(fromUserId, toAddress, amount)` | Transfer ST tokens | `fromUserId: string, toAddress: string, amount: string` | `Promise<TransactionResult>` |
-| `createSellOffer(userId, offerData)` | Create energy sell offer | `userId: string, offerData: OfferData` | `Promise<OfferResult>` |
-| `createBuyOffer(userId, offerData)` | Create energy buy offer | `userId: string, offerData: OfferData` | `Promise<OfferResult>` |
-| `getActiveOffers(offset, limit)` | Get marketplace offers | `offset: number, limit: number` | `Promise<OffersResult>` |
-| `acceptOffer(userId, offerId, amount)` | Execute energy trade | `userId: string, offerId: string, amount: string` | `Promise<TransactionResult>` |
-| `mintTokensForProduction(userId, amount)` | Mint tokens for energy production | `userId: string, amount: string` | `Promise<MintResult>` |
-| `getSystemStats()` | Get blockchain statistics | None | `Promise<StatsResult>` |
-| `getCurrentEnergyPrice()` | Get oracle price data | None | `Promise<PriceResult>` |
+Core:
+- `createUserWallet(userId, options)` → Promise<WalletCreateResult>
+- `getUserWallet(userId)` → Promise<WalletDataResult>
+- `getUserAddress(userId)` → string
+- `transferTokens(fromUserId, toAddress, amount)` → Promise<TransactionResult>
+
+Marketplace:
+- `createSellOffer(userId, offerData)` → Promise<OfferTxResult>
+- `createBuyOffer(userId, offerData)` → Promise<OfferTxResult>
+- `getActiveOffers(offset, limit)` → Promise<{ success, data: OfferView[] }>
+- `acceptOffer(userId, offerId, energyAmount)` → Promise<TransactionResult>
+
+Tokens & Oracle:
+- `mintTokensForProduction(userId, amount)` → Promise<TransactionResult>
+- `getCurrentEnergyPrice()` → Promise<{ success, data: { price, timestamp, confidence } }>
+
+System:
+- `getSystemStats()` → Promise<{ success, data: SystemOverview }>
+- `getArchitectureOverview()` → ArchitectureOverview
+
+Governance & Validators:
+- `createGovernanceProposal(userId, proposalData)` → Promise<{ success, data: { proposalId, deadline, status } }>
+- `voteOnProposal(userId, proposalId, vote)` → Promise<{ success, data: { proposalId, vote, currentVotes } }>
+- `getActiveProposals()` → Promise<{ success, data: ProposalView[] }>
+- `registerValidator(userId, { stakeAmount, nodeAddress, hardware })` → Promise<{ success, data: { validatorId, stakeAmount, status } }>
+
+Compliance:
+- `getComplianceReport(requestorId, { startDate, endDate, reportType })` → Promise<{ success, data: ComplianceReport }>
 
 ### Data Types
 
-#### WalletResult
+#### WalletCreateResult (from `createUserWallet`)
 ```typescript
-interface WalletResult {
+interface WalletCreateResult {
     success: boolean;
     data?: {
         address: string;
-        balance: string;
-        walletIndex: number;
+        balance: string;           // initial ST balance as string
+        walletIndex: number;       // mapped Hardhat account index (dev)
+        role: 'prosumer' | 'consumer' | 'validator' | 'regulator' | 'admin';
+        kycVerified: boolean;
+        kycAuthority: string;
+        governanceTokens: string;  // allocated governance tokens
+        privacy: { encryptMetadata: boolean; zeroKnowledge?: boolean };
+        permissions: string[];     // RBAC-permitted operations
+    };
+    error?: string;
+}
+```
+
+#### WalletDataResult (from `getUserWallet`)
+```typescript
+interface WalletDataResult {
+    success: boolean;
+    data?: {
+        address: string;
+        balance: {
+            solarToken: string;   // e.g., "150 ST"
+            energyCredits: string;// mock/demo value
+            eth: string;          // native balance
+        };
+        transactions: Array<{
+            id: string;
+            type: 'sell' | 'buy' | 'transfer';
+            description: string;
+            amount: string;      // e.g., "+5.0 kWh"
+            value: string;       // e.g., "+40.0 ST"
+            timestamp: string;   // relative e.g., "15m ago"
+            txHash: string;
+        }>
     };
     error?: string;
 }
@@ -134,6 +220,20 @@ interface OfferData {
 }
 ```
 
+#### OfferTxResult
+```typescript
+interface OfferTxResult {
+    success: boolean;
+    data?: {
+        transactionHash: string;
+        blockNumber: string;
+        gasUsed?: string;
+        offerId?: string;     // when available from contract
+    };
+    error?: string;
+}
+```
+
 #### TransactionResult
 ```typescript
 interface TransactionResult {
@@ -141,10 +241,49 @@ interface TransactionResult {
     data?: {
         transactionHash: string;
         blockNumber: string;
-        gasUsed: string;
-        nonce?: number;
+        gasUsed?: string;
+        to?: string;
+        amount?: string;
     };
     error?: string;
+}
+```
+
+#### Governance
+```typescript
+type VoteChoice = 'for' | 'against' | 'abstain';
+
+interface ProposalView {
+    id: string;
+    title: string;
+    description: string;
+    category: 'parameter' | 'upgrade' | 'policy' | string;
+    deadline: string;
+    votes: { for: number; against: number; abstain: number };
+    voterCount: number;
+}
+
+interface ComplianceReport {
+    reportId: string;
+    requestor: string;
+    dateRange: { startDate: string; endDate: string };
+    reportType: 'full' | 'transactions' | 'users' | string;
+    generatedAt: string;
+    metrics: {
+        totalTransactions: number;
+        kycVerifications: number;
+        securityEvents: number;
+        governanceActivities: number;
+        validatorCount: number;
+        activeUsers: number;
+    };
+    events: Array<any>;
+    compliance: {
+        kycCompliance: string;
+        dataPrivacy: string;
+        auditTrail: string;
+        governance: string;
+    };
 }
 ```
 
@@ -152,7 +291,7 @@ interface TransactionResult {
 
 ### Environment Variables
 
-The blockchain service uses these environment variables (defined in `.env`):
+The blockchain service auto-initializes using the local Hardhat network via `SolChainConfig`. For advanced setups, these env vars may be used:
 
 ```bash
 # Blockchain Configuration
@@ -172,9 +311,9 @@ DEFAULT_GAS_PRICE=20000000000
 
 ### Initialization Dependencies
 
-1. **Blockchain Node**: Hardhat local node must be running
-2. **Smart Contracts**: All SolChain contracts must be deployed
-3. **Configuration**: Contract addresses must be available
+1. Blockchain Node: Hardhat local node running
+2. Smart Contracts: SolChain contracts deployed (auto-handled in dev by SolChain API config)
+3. Configuration: Contract addresses available (or auto-populated)
 
 ## 🧪 Testing
 
@@ -216,9 +355,9 @@ console.log('Offer created:', offer);
 ## 🔒 Security Considerations
 
 ### Private Key Management
-- 🚨 **Development**: Uses hardhat accounts for testing
-- 🏭 **Production**: Implement secure key management (HSM, AWS KMS)
-- 🔐 **Access Control**: Limit minting permissions to authorized accounts
+- 🚨 Development: Uses Hardhat accounts for testing (deterministic userId→address mapping)
+- 🏭 Production: Secure key management (HSM/AWS KMS); never store raw keys in code
+- 🔐 Access Control: Limit minting/approval to authorized roles (MINTER, etc.)
 
 ### Smart Contract Security
 - ✅ **Role-based Access**: MINTER_ROLE, PAUSER_ROLE controls
@@ -226,9 +365,9 @@ console.log('Offer created:', offer);
 - ✅ **Input Validation**: Comprehensive parameter checking
 
 ### API Security
-- 🛡️ **Input Sanitization**: Validate all user inputs
-- 📊 **Rate Limiting**: Prevent blockchain spam
-- 🔍 **Transaction Monitoring**: Log all blockchain operations
+- 🛡️ Input validation on all endpoints (amounts, addresses, IDs)
+- 📊 Rate limiting to prevent transaction spam
+- 🔍 Audit logging: all key events are logged with SHA-256 hashes
 
 ## 🚀 Deployment
 
@@ -287,10 +426,10 @@ npm run dev
 - Platform performance metrics
 
 ### Roadmap Features
-- 🌐 **Multi-chain Support**: Ethereum, Polygon, BSC
-- 🔄 **Cross-chain Bridges**: Asset transfers between networks
-- 📱 **Mobile SDK**: React Native integration
-- 🤖 **AI-powered Pricing**: Smart contract-based dynamic pricing
+- 🌐 Multi-chain support (Ethereum/Polygon/BSC)
+- 🔄 Cross-chain bridges
+- 📱 Mobile SDK (React Native)
+- 🤖 AI-powered pricing (integration with `ai-ml/` services)
 
 ## 🤝 Contributing
 
@@ -317,10 +456,9 @@ npm run dev
 
 For questions or issues with the backend services:
 
-- 📧 **Email**: dev@solchain.com
-- 💬 **Discord**: SolChain Development Server
-- 📖 **Documentation**: [Full API Docs](../docs/api-reference.md)
-- 🐛 **Issues**: [GitHub Issues](https://github.com/gagradebnath/SolChain/issues)
+- 📧 Email: dev@solchain.com
+- 💬 Discord: SolChain Development Server
+- 🐛 Issues: https://github.com/gagradebnath/SolChain/issues
 
 ## 📄 License
 
