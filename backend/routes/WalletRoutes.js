@@ -1,15 +1,17 @@
+
+
 const express = require("express");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
-const blockchainService = require("../services/BlockchainService");
+const fs = require("fs");
+const path = require("path");
 
-
+// --- AUTHENTICATION ---
 function authenticateToken(req, res, next) {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return res.status(401).json({ error: "Unauthorized: No token provided" });
   }
-
   const token = authHeader.split(" ")[1];
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -20,106 +22,59 @@ function authenticateToken(req, res, next) {
   }
 }
 
-router.get("/", authenticateToken, async (req, res) => {
+// --- HELPER: Read JSON file ---
+function getJsonData(filename) {
+  const filePath = path.join(__dirname, '../../database/jsons/', filename);
+  if (!fs.existsSync(filePath)) return [];
   try {
-    const user = req.user;
-    console.log("Fetching blockchain wallet for user:", user.id);
-
-    // Get wallet data from blockchain
-    const walletResult = await blockchainService.getUserWallet(user.id.toString());
-    
-    if (walletResult.success) {
-      res.json({
-        success: true,
-        transactions: walletResult.data.transactions,
-        balance: walletResult.data.balance,
-        address: walletResult.data.address
-      });
-    } else {
-      console.error("❌ Failed to fetch wallet data:", walletResult.error);
-      res.status(500).json({
-        success: false,
-        error: "Failed to fetch wallet data: " + walletResult.error
-      });
-    }
-  } catch (error) {
-    console.error("❌ Wallet route error:", error.message);
-    res.status(500).json({
-      success: false,
-      error: "Internal server error"
-    });
+    return JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+  } catch (err) {
+    console.error(`Error reading ${filename}:`, err);
+    return [];
   }
-});
+}
 
-// Create wallet endpoint
-router.post("/create", authenticateToken, async (req, res) => {
-  try {
-    const user = req.user;
-    console.log("Creating blockchain wallet for user:", user.id);
+// --- ROUTE: GET /wallet ---
+router.get("/", authenticateToken, (req, res) => {
+  const userId = req.user.id;
 
-    const walletResult = await blockchainService.createUserWallet(user.id.toString());
-    
-    if (walletResult.success) {
-      res.json({
-        success: true,
-        wallet: walletResult.data,
-        message: "Wallet created successfully"
-      });
-    } else {
-      res.status(500).json({
-        success: false,
-        error: "Failed to create wallet: " + walletResult.error
-      });
-    }
-  } catch (error) {
-    console.error("❌ Wallet creation error:", error.message);
-    res.status(500).json({
-      success: false,
-      error: "Internal server error"
+  // Load JSONs
+  const transactionsArr = getJsonData('transactions.json');
+  const walletsArr = getJsonData('wallets.json');
+  const usersArr = getJsonData('users.json');
+
+  // Helper to get username by userId
+  const getUsername = (id) => usersArr.find(u => u.id === id)?.username || id;
+
+  // Filter transactions for this user
+  const userTransactions = transactionsArr
+    .filter(tx => tx.from === userId || tx.to === userId)
+    .map(tx => {
+      const isSender = tx.from === userId;
+      const counterpartyName = getUsername(isSender ? tx.to : tx.from);
+      return {
+        id: tx.id,
+        type: tx.from === userId ? "sell" : "buy",
+        description: isSender
+          ? `Sold ${tx.amount} ${tx.unit} to ${counterpartyName}`
+          : `Bought ${tx.amount} ${tx.unit} from ${counterpartyName}`,
+        timestamp: new Date(tx.timestamp).toLocaleTimeString("en-US", { hour: '2-digit', minute: '2-digit' }),
+        value: isSender ? `+${tx.tokenValue} SOL` : `-${tx.tokenValue} SOL`
+      };
     });
-  }
-});
 
-// Transfer tokens endpoint
-router.post("/transfer", authenticateToken, async (req, res) => {
-  try {
-    const user = req.user;
-    const { toAddress, amount } = req.body;
+  // Get user wallet
+  const userWallet = walletsArr.find(w => w.userId === userId) || { balance: 0, energyCredits: 0 };
+  const balance = {
+    solarToken: `${userWallet.balance} SOL`,
+    energyCredits: `${userWallet.energyCredits}`
+  };
 
-    if (!toAddress || !amount) {
-      return res.status(400).json({
-        success: false,
-        error: "toAddress and amount are required"
-      });
-    }
-
-    console.log(`Transferring ${amount} ST from user ${user.id} to ${toAddress}`);
-
-    const transferResult = await blockchainService.transferTokens(
-      user.id.toString(),
-      toAddress,
-      amount
-    );
-    
-    if (transferResult.success) {
-      res.json({
-        success: true,
-        transaction: transferResult.data,
-        message: `Successfully transferred ${amount} ST`
-      });
-    } else {
-      res.status(400).json({
-        success: false,
-        error: "Transfer failed: " + transferResult.error
-      });
-    }
-  } catch (error) {
-    console.error("❌ Transfer error:", error.message);
-    res.status(500).json({
-      success: false,
-      error: "Internal server error"
-    });
-  }
+  res.json({
+    success: true,
+    transactions: userTransactions,
+    balance
+  });
 });
 
 module.exports = router;

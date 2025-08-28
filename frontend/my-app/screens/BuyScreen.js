@@ -32,6 +32,7 @@ const translations = {
     purchaseMessage: "You have successfully purchased energy.",
     oops: "Oops",
     noSellers: "No sellers currently available.",
+    onMarket: "On Market:",
     languageToggle: "EN → BN"
   },
   bn: {
@@ -46,6 +47,7 @@ const translations = {
     purchaseMessage: "আপনি সফলভাবে শক্তি কিনেছেন।",
     oops: "দুঃখিত",
     noSellers: "বর্তমানে কোন বিক্রেতা উপলব্ধ নেই।",
+    onMarket: "বাজারে:",
     languageToggle: "BN → EN"
   },
 };
@@ -92,20 +94,52 @@ export default function BuyEnergyScreen() {
     }
 
 
-  const handleBuyEnergy = (seller) => {
-    Alert.alert(
-      translations[language].confirmPurchase,
-      `Are you sure you want to buy energy from ${seller.name}?\n\nAmount: ${seller.availableUnits}\nPrice: ${seller.rate} SOL/kWh`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: translations[language].buyNow,
-          onPress: () => executePurchase(seller),
+  const handleBuyEnergy = async (seller) => {
+  Alert.alert(
+    translations[language].confirmPurchase,
+    `Are you sure you want to buy ${seller.availableUnits} from ${seller.name}?`,
+    [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: translations[language].buyNow,
+        onPress: async () => {
+          try {
+            const token = await AsyncStorage.getItem('token');
+            const response = await fetch(`${config.API_BASE_URL}/buy/buyNow`, {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                sellerId: seller.id,
+                amount: parseFloat(seller.onMarket.split(' ')[0]), // assuming onMarket is "7 kWh"
+                rate: parseFloat(seller.rate.split(' ')[0]),       // assuming rate is "0.24 SOL/kWh"
+              }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+              throw new Error(data.error || 'Failed to buy energy');
+            }
+
+            Alert.alert(translations[language].purchaseSuccessful, translations[language].purchaseMessage);
+
+            // Optionally refresh the sellers list to show updated onMarket
+            fetchSellers();
+
+          } catch (err) {
+            console.error("Error buying energy:", err);
+            Alert.alert("Error", "Failed to complete the purchase. Check your network connection.");
+          }
         },
-      ],
-      { cancelable: false }
-    );
-  };
+      },
+    ],
+    { cancelable: false }
+  );
+};
+
 
   const executePurchase = async (seller) => {
     try {
@@ -161,6 +195,9 @@ export default function BuyEnergyScreen() {
         </Text>
         <Text style={styles.cardText}>
           <Text style={styles.cardLabel}>{translations[language].availableUnits}</Text> {item.availableUnits}
+        </Text>
+        <Text style={styles.cardText}>
+          <Text style={styles.cardLabel}>{translations[language].onMarket}</Text> {item.onMarket}
         </Text>
         <Text style={styles.cardText}>
           <Text style={styles.cardLabel}>{translations[language].trustScore}</Text> {item.trustScore}

@@ -1,15 +1,31 @@
 const express = require("express");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
-const blockchainService = require("../services/BlockchainService");
+const fs = require("fs");
+const path = require("path");
+const { use } = require("react");
 
-
+// Helper to read JSON files
+function getJsonData(filename) {
+  const filePath = path.join(__dirname, '../../database/jsons', filename);
+  if (!fs.existsSync(filePath)) return [];
+  try {
+    const data = fs.readFileSync(filePath, 'utf-8');
+    return JSON.parse(data);
+  } catch {
+    return [];
+  }
+}
+function saveJsonData(filename, data) {
+  const filePath = path.join(__dirname, '../../database/jsons', filename);
+  fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf-8');
+}
+// Authenticate JWT token
 function authenticateToken(req, res, next) {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return res.status(401).json({ error: "Unauthorized: No token provided" });
   }
-
   const token = authHeader.split(" ")[1];
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -20,170 +36,160 @@ function authenticateToken(req, res, next) {
   }
 }
 
-router.get("/", authenticateToken, async (req, res) => {
-  try {
-    const user = req.user;
-    console.log("Fetching active energy offers for user:", user.id);
+router.get("/", authenticateToken, (req, res) => {
+  const usersArr = getJsonData('users.json');       // All users
+  const realtimeArr = getJsonData('realtime.json'); // Real-time available energy
 
-    // Get active offers from blockchain
-    const offersResult = await blockchainService.getActiveOffers(0, 20);
-    
-    if (offersResult.success) {
-      res.json({
-        success: true,
-        data: offersResult.data,
-      });
-    } else {
-      console.error("❌ Failed to fetch offers:", offersResult.error);
-      // Fallback to empty array if blockchain is not available
-      res.json({
-        success: true,
-        data: [],
-        message: "No active offers available"
-      });
-    }
-  } catch (error) {
-    console.error("❌ Buy route error:", error.message);
-    res.status(500).json({
-      success: false,
-      error: "Failed to fetch energy offers"
-    });
-  }
+  const sellers = usersArr
+  .filter(u => !u.buying && u.id !== req.user.id) // selling users
+  .map(u => {
+    const realtime = realtimeArr.find(r => r.userId === u.id);
+    const availableUnits = realtime?.available || 0;
+    const attemptedOnMarket = realtime?.onMarket || 0;
+    const onMarket = attemptedOnMarket > availableUnits ? availableUnits : attemptedOnMarket;
+    return {
+      id: u.id,
+      name: u.username,
+      rate: u.rate,
+      availableUnits: `${availableUnits} kWh`,
+      trustScore: '90%',
+      type: 'peer',
+      onMarket: `${onMarket} kWh (attempted ${attemptedOnMarket} kWh)`,
+      coordinate: { latitude: u.latitude, longitude: u.longitude }
+    };
+  });
+  console.log(`User ${req.user.id} fetched sellers list, found ${sellers.length} sellers.`);
+  res.json({
+    success: true,
+    data: sellers,
+  });
 });
 
-// Create buy offer endpoint
-router.post("/offer", authenticateToken, async (req, res) => {
-  try {
-    const user = req.user;
-    const { energyAmount, pricePerKwh, duration, location, energySource } = req.body;
+router.post("/buyNow", authenticateToken, (req, res) => {
+  const buyer = req.user;
+  const { sellerId, amount, rate } = req.body;
 
-    if (!energyAmount || !pricePerKwh) {
-      return res.status(400).json({
-        success: false,
-        error: "energyAmount and pricePerKwh are required"
-      });
-    }
+  if (!sellerId || !amount || amount <= 0 || !rate || rate <= 0) {
+    return res.status(400).json({ success: false, error: "Invalid input" });
+  }
 
-    console.log(`Creating buy offer for user ${user.id}: ${energyAmount} kWh at ${pricePerKwh} ST/kWh`);
+  const usersArr = getJsonData('users.json');
+  const realtimeArr = getJsonData('realtime.json');
+  const walletsArr = getJsonData('wallets.json');
+  const transactionsArr = getJsonData('transactions.json');
+  const notificationsArr = getJsonData('notifications.json'); // <- notifications
 
-    const offerResult = await blockchainService.createBuyOffer(user.id.toString(), {
-      energyAmount,
-      pricePerKwh,
-      duration: duration || 24,
-      location: location || "Grid-Zone-A",
-      energySource: energySource || "Any"
-    });
-    
-    if (offerResult.success) {
-      res.json({
-        success: true,
-        offer: offerResult.data,
-        message: "Buy offer created successfully"
-      });
-    } else {
-      res.status(400).json({
-        success: false,
-        error: "Failed to create buy offer: " + offerResult.error
-      });
-    }
-  } catch (error) {
-    console.error("❌ Create buy offer error:", error.message);
-    res.status(500).json({
+  const sellerIndex = usersArr.findIndex(u => u.id === sellerId);
+  const sellerRealtimeIndex = realtimeArr.findIndex(r => r.userId === sellerId);
+  const buyerWalletIndex = walletsArr.findIndex(w => w.userId === buyer.id);
+  const sellerWalletIndex = walletsArr.findIndex(w => w.userId === sellerId);
+
+  if (sellerIndex === -1 || sellerRealtimeIndex === -1 || buyerWalletIndex === -1 || sellerWalletIndex === -1) {
+    return res.status(404).json({ success: false, error: "Buyer or seller not found" });
+  }
+
+  const available = realtimeArr[sellerRealtimeIndex].available || 0;
+  if (amount > available) {
+    return res.status(400).json({
       success: false,
-      error: "Internal server error"
+      error: `Cannot buy ${amount} kWh. Seller has only ${available} kWh available.`,
     });
   }
-});
 
-// Accept offer endpoint
-router.post("/accept", authenticateToken, async (req, res) => {
-  try {
-    const user = req.user;
-    const { offerId, energyAmount } = req.body;
+  // Reduce seller's available energy
+  realtimeArr[sellerRealtimeIndex].available = +(available - amount).toFixed(3);
+  // Update buyer's available energy
+  const buyerRealtimeIndex = realtimeArr.findIndex(r => r.userId === buyer.id);
+  realtimeArr[buyerRealtimeIndex].available = +(realtimeArr[buyerRealtimeIndex].available + amount).toFixed(3);
 
-    if (!offerId || !energyAmount) {
-      return res.status(400).json({
-        success: false,
-        error: "offerId and energyAmount are required"
-      });
-    }
+  // Reduce onMarket if needed
+  const onMarket = realtimeArr[sellerRealtimeIndex].onMarket || 0;
+  realtimeArr[sellerRealtimeIndex].onMarket = +(Math.max(onMarket - amount, 0)).toFixed(3);
 
-    console.log(`User ${user.id} accepting offer ${offerId} for ${energyAmount} kWh`);
+  // Update wallets
+  const totalCost = +(amount * rate).toFixed(3);
+  walletsArr[buyerWalletIndex].balance = +(walletsArr[buyerWalletIndex].balance - totalCost).toFixed(3);
+  walletsArr[buyerWalletIndex].energyCredits = +(walletsArr[buyerWalletIndex].energyCredits + amount).toFixed(3);
 
-    const acceptResult = await blockchainService.acceptOffer(
-      user.id.toString(),
-      offerId,
-      energyAmount
-    );
-    
-    if (acceptResult.success) {
-      res.json({
-        success: true,
-        transaction: acceptResult.data,
-        message: "Offer accepted successfully"
-      });
-    } else {
-      res.status(400).json({
-        success: false,
-        error: "Failed to accept offer: " + acceptResult.error
-      });
-    }
-  } catch (error) {
-    console.error("❌ Accept offer error:", error.message);
-    res.status(500).json({
-      success: false,
-      error: "Internal server error"
+  walletsArr[sellerWalletIndex].balance = +(walletsArr[sellerWalletIndex].balance + totalCost).toFixed(3);
+  walletsArr[sellerWalletIndex].energyCredits = +(walletsArr[sellerWalletIndex].energyCredits - amount).toFixed(3);
+
+  // Create transaction
+  let maxId = transactionsArr
+    .map(t => parseInt(t.id.replace(/^tx/, '')))
+    .reduce((acc, val) => Math.max(acc, val), 0);
+  const newTxId = `tx${maxId + 1}`;
+  const newTx = {
+    id: newTxId,
+    from: sellerId,
+    to: buyer.id,
+    amount: +amount,
+    unit: "kWh",
+    tokenValue: totalCost,
+    timestamp: new Date().toISOString(),
+    type: "sell",
+  };
+  transactionsArr.push(newTx);
+
+  // --- Add notifications for buyer and seller ---
+  const buyerNotification = {
+    id: Date.now().toString() + "_b",
+    title: 'Purchase Successful',
+    message: `You purchased ${amount} kWh from ${usersArr[sellerIndex].username} at $${rate}/kWh.`,
+    type: 'transaction',
+    timestamp: new Date().toISOString(),
+    isRead: false
+  };
+
+  const sellerNotification = {
+    id: Date.now().toString() + "_s",
+    title: 'Energy Sold',
+    message: `${buyer.username} purchased ${amount} kWh from you at $${rate}/kWh.`,
+    type: 'transaction',
+    timestamp: new Date().toISOString(),
+    isRead: false
+  };
+  const sellerNotificationIndex = notificationsArr.findIndex(n => n.userId === sellerId);
+  const buyerNotificationIndex = notificationsArr.findIndex(n => n.userId === buyer.id);
+  
+
+  if (buyerNotificationIndex !== -1) {
+    notificationsArr[buyerNotificationIndex].notifications.push(buyerNotification);
+  } else {
+    notificationsArr.push({
+      userId: buyer.id,
+      notifications: [buyerNotification]
     });
   }
-});
 
-// Execute energy purchase
-router.post("/offer", authenticateToken, async (req, res) => {
-  try {
-    const user = req.user;
-    const { offerId, energyAmount } = req.body;
-
-    console.log(`User ${user.id} attempting to buy ${energyAmount} kWh from offer ${offerId}`);
-
-    // Validate input
-    if (!offerId || !energyAmount) {
-      return res.status(400).json({
-        success: false,
-        error: "Offer ID and energy amount are required"
-      });
-    }
-
-    // Execute the purchase on blockchain
-    const purchaseResult = await blockchainService.acceptOffer(
-      user.id.toString(),
-      offerId,
-      energyAmount.toString()
-    );
-
-    if (purchaseResult.success) {
-      res.json({
-        success: true,
-        data: {
-          message: "Energy purchase completed successfully",
-          transactionHash: purchaseResult.data.transactionHash,
-          blockNumber: purchaseResult.data.blockNumber,
-          offerId,
-          energyAmount
-        }
-      });
-    } else {
-      res.status(500).json({
-        success: false,
-        error: "Failed to execute purchase: " + purchaseResult.error
-      });
-    }
-  } catch (error) {
-    console.error("❌ Buy offer error:", error.message);
-    res.status(500).json({
-      success: false,
-      error: "Internal server error"
+  if (sellerNotificationIndex !== -1) {
+    notificationsArr[sellerNotificationIndex].notifications.push(sellerNotification);
+  } else {
+    notificationsArr.push({
+      userId: sellerId,
+      notifications: [sellerNotification]
     });
   }
+
+  const sellerUserIndex = usersArr.findIndex(u => u.id === sellerId);
+  usersArr[sellerUserIndex].buying = true;
+  // Save all changes
+  saveJsonData('realtime.json', realtimeArr);
+  saveJsonData('wallets.json', walletsArr);
+  saveJsonData('transactions.json', transactionsArr);
+  saveJsonData('notifications.json', notificationsArr);
+  saveJsonData('users.json', usersArr);
+
+  res.json({
+    success: true,
+    message: `Successfully purchased ${amount} kWh from user ${sellerId}`,
+    transaction: newTx,
+    sellerAvailable: realtimeArr[sellerRealtimeIndex].available,
+    sellerOnMarket: realtimeArr[sellerRealtimeIndex].onMarket,
+    buyerWallet: walletsArr[buyerWalletIndex],
+    sellerWallet: walletsArr[sellerWalletIndex],
+  });
 });
+
 
 module.exports = router;

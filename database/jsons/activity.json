@@ -1,0 +1,50 @@
+[
+  {
+    "id": "2501",
+    "userId": "user1",
+    "type": "transaction",
+    "description": "Sold 0.5 kWh to Grid",
+    "timestamp": "2024-08-25T10:30:00Z",
+    "value": "+0.5 SOL"
+  },
+  {
+    "id": "2502",
+    "userId": "user1",
+    "type": "notification",
+    "description": "System maintenance scheduled",
+    "timestamp": "2024-08-25T08:00:00Z",
+    "value": null
+  },
+  {
+    "id": "2503",
+    "userId": "user1",
+    "type": "transaction",
+    "description": "Sold 0.5 kWh to Grid",
+    "timestamp": "2024-08-25T10:30:00Z",
+    "value": "+0.5 SOL"
+  },
+  {
+    "id": "2504",
+    "userId": "user1",
+    "type": "notification",
+    "description": "System maintenance scheduled",
+    "timestamp": "2024-08-25T08:00:00Z",
+    "value": null
+  },
+  {
+    "id": "2505",
+    "userId": "user1",
+    "type": "transaction",
+    "description": "Sold 0.5 kWh to Grid",
+    "timestamp": "2024-08-25T10:30:00Z",
+    "value": "+0.5 SOL"
+  },
+  {
+    "id": "2506",
+    "userId": "user1",
+    "type": "notification",
+    "description": "System maintenance scheduled",
+    "timestamp": "2024-08-25T08:00:00Z",
+    "value": null
+  }
+]
