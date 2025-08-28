@@ -89,6 +89,9 @@ async function main() {
         const MINTER_ROLE = await solarToken.MINTER_ROLE();
         await solarToken.grantRole(MINTER_ROLE, await energyTrading.getAddress());
         await solarToken.grantRole(MINTER_ROLE, await staking.getAddress());
+        // Grant MINTER_ROLE to deployer for API operations
+        await solarToken.grantRole(MINTER_ROLE, deployer.address);
+        console.log(`   ✅ MINTER_ROLE granted to deployer: ${deployer.address}`);
         
         // Whitelist contracts to avoid transfer fees
         await solarToken.addToWhitelist(await energyTrading.getAddress());
@@ -123,6 +126,16 @@ async function main() {
             100, // 100% weight
             "Default data feed"
         );
+        
+        // Grant DATA_FEED_ROLE to deployer for price updates
+        const DATA_FEED_ROLE = await oracle.DATA_FEED_ROLE();
+        await oracle.grantRole(DATA_FEED_ROLE, deployer.address);
+        
+        // Set initial price data for testing (very close to constructor default: 0.008 ETH)
+        // Constructor sets 8 * 10^15 wei (0.008 ETH), let's set 7.5 finney (0.0075 ETH) for 6.25% deviation
+        const initialPrice = ethers.parseUnits("7.5", "finney"); // 7.5 finney = 0.0075 ETH per kWh
+        await oracle.updatePrice(initialPrice, 95);
+        console.log(`   📊 Set initial energy price: ${ethers.formatUnits(initialPrice, "ether")} ETH/kWh`);
         console.log("✅ Oracle configured\n");
 
         // Initialize some tokens for testing
