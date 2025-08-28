@@ -3,17 +3,17 @@
     "id": "w2501",
     "userId": "2501",
     "address": "0x123...",
-    "balance": 5003.3,
+    "balance": 4996.512,
     "currency": "SOL",
-    "energyCredits": 9986.5
+    "energyCredits": 10012.7
   },
   {
     "id": "w2502",
     "userId": "2502",
     "address": "0x456...",
-    "balance": 5000,
+    "balance": 5000.288,
     "currency": "SOL",
-    "energyCredits": 10000
+    "energyCredits": 9998.8
   },
   {
     "id": "w2503",
@@ -35,8 +35,8 @@
     "id": "w2505",
     "userId": "2505",
     "address": "0x789...",
-    "balance": 4994.468,
+    "balance": 5000.968,
     "currency": "SOL",
-    "energyCredits": 10022.8
+    "energyCredits": 9997.8
   }
 ]

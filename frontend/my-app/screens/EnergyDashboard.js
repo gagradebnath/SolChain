@@ -298,6 +298,7 @@ const renderProductionChart = () => {
                     <Text style={styles.sectionTitle}>{t.predictions}</Text>
                      <View style={styles.detailRow}><Text>{t.nextHour}: {energyData.predictions.nextHourProduction}</Text></View>
                      <View style={styles.detailRow}><Text>{t.peakTime}: {energyData.predictions.peakTime}</Text></View>
+                     <View style={styles.detailRow}><Text>{t.nextHour}: {energyData.predictions.nextHourProduction}</Text></View>
                 </View>
 
                 {/* --- EXPORT BUTTON --- */}

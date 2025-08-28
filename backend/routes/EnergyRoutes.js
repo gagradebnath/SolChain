@@ -5,6 +5,9 @@ const jwt = require("jsonwebtoken");
 const fs = require("fs");
 const path = require("path");
 
+// Add fetch for Node.js (if using Node.js < 18)
+const fetch = require('node-fetch').default || require('node-fetch');
+
 function authenticateToken(req, res, next) {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -32,7 +35,7 @@ function getJsonData(filename) {
   }
 }
 
-router.get("/", authenticateToken, (req, res) => {
+router.get("/", authenticateToken, async (req, res) => {
   const userId = req.user.id;
 
   const realtimeArr = getJsonData('realtime.json');
@@ -42,6 +45,52 @@ router.get("/", authenticateToken, (req, res) => {
   const gridArr = getJsonData('grid.json');        // global
   const weatherArr = getJsonData('weather.json');  // global
   const historicalArr = getJsonData('historical.json'); 
+  
+  const payload = [
+    {
+      "deviceId": "DEVICE_001",
+      "deviceType": "residential_small",
+      "consumption": 500.2,
+      "production": 2.1,
+      "temperature": 25.5,
+      "humidity": 0.6,
+      "solarIrradiance": 600.0,
+      "windSpeed": 3.2,
+      "hour": 24,
+      "dayOfWeek": 2,
+      "month": 8,
+      "isWeekend": false,
+      "hasSmartMeter": true,
+      "hasSolar": true
+    }
+  ];
+
+  let ai_predictions = null;
+  
+  try {
+    if (process.env.AI_API_URL) {
+      const response = await fetch(`${process.env.AI_API_URL}/predict/forcast`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${req.user.token || ''}`
+        },
+        body: JSON.stringify(payload)
+      });
+      
+      if (response.ok) {
+        ai_predictions = await response.json();
+        console.log("AI Predictions:", ai_predictions);
+      } else {
+        console.error("AI API response error:", response.status, response.statusText);
+      }
+    } else {
+      console.log("AI_API_URL not configured, skipping AI predictions");
+    }
+  } catch (error) {
+    console.error("Error calling AI API:", error.message);
+    ai_predictions = null;
+  }
 
   const realTimeMetrics = realtimeArr.find(d => d.userId === userId);
 
@@ -66,7 +115,10 @@ router.get("/", authenticateToken, (req, res) => {
     week: [25, 28, 22, 30, 27, 29, 31],
     month: [100, 120, 110, 130, 125, 115, 140]
   };
+
   console.log("Energy Data fetched by user: ", userId);
+  console.log("AI Predictions Result:", ai_predictions);
+  
   res.json({
     success: true,
     data: {
@@ -76,7 +128,8 @@ router.get("/", authenticateToken, (req, res) => {
       predictions,
       grid,
       weather,
-      historical
+      historical,
+      aiPredictions: ai_predictions
     }
   });
 });
