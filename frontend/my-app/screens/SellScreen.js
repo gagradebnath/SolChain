@@ -15,7 +15,6 @@ import { StatusBar } from 'expo-status-bar';
 import UniversalSafeArea from '../components/UniversalSafeArea';
 import UniversalScrollContainer from '../components/UniversalScrollContainer';
 import styles from '../styles/BuySellScreenStyles.js';
-import config from '../assets/config';
 
 const translations = {
   en: {
@@ -66,6 +65,7 @@ export default function SellEnergyScreen() {
   const [onMarket, setOnMarket] = useState(null);
   const [isBuying, setIsBuying] = useState(false);
   const [sellMode, setSellMode] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -130,6 +130,8 @@ export default function SellEnergyScreen() {
       return;
     }
 
+    setIsSubmitting(true);
+
     try {
       const token = await AsyncStorage.getItem('token');
 
@@ -161,6 +163,8 @@ export default function SellEnergyScreen() {
       fetchData(); // refresh
     } catch (err) {
       Alert.alert("Error listing energy:", err.message);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 

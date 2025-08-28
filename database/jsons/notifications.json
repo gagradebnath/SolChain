@@ -49,6 +49,30 @@
         "type": "trade",
         "timestamp": "2025-08-25T17:30:35.113Z",
         "isRead": false
+      },
+      {
+        "id": "1756399523819_b",
+        "title": "Purchase Successful",
+        "message": "You purchased 1.5 kWh from BinaA at $0.24/kWh.",
+        "type": "transaction",
+        "timestamp": "2025-08-28T16:45:23.819Z",
+        "isRead": false
+      },
+      {
+        "id": "1756399769674_s",
+        "title": "Energy Sold",
+        "message": "undefined purchased 10 kWh from you at $0.25/kWh.",
+        "type": "transaction",
+        "timestamp": "2025-08-28T16:49:29.674Z",
+        "isRead": false
+      },
+      {
+        "id": "1756401509394",
+        "title": "Energy Listed for Sale",
+        "message": "You listed 1 kWh at $0.2/kWh on the market.",
+        "type": "trade",
+        "timestamp": "2025-08-28T17:18:29.394Z",
+        "isRead": false
       }
     ]
   },
@@ -120,6 +144,14 @@
         "type": "trade",
         "timestamp": "2025-08-25T17:53:50.815Z",
         "isRead": true
+      },
+      {
+        "id": "1756399523819_s",
+        "title": "Energy Sold",
+        "message": "undefined purchased 1.5 kWh from you at $0.24/kWh.",
+        "type": "transaction",
+        "timestamp": "2025-08-28T16:45:23.819Z",
+        "isRead": false
       }
     ]
   },
@@ -148,6 +180,22 @@
         "message": "You purchased 1.8 kWh from BinaA at $0.24/kWh.",
         "type": "transaction",
         "timestamp": "2025-08-25T17:53:10.976Z",
+        "isRead": false
+      },
+      {
+        "id": "1756399769674_b",
+        "title": "Purchase Successful",
+        "message": "You purchased 10 kWh from JohnDoe at $0.25/kWh.",
+        "type": "transaction",
+        "timestamp": "2025-08-28T16:49:29.674Z",
+        "isRead": false
+      },
+      {
+        "id": "1756399871778",
+        "title": "Energy Listed for Sale",
+        "message": "You listed 20 kWh at $0.2/kWh on the market.",
+        "type": "trade",
+        "timestamp": "2025-08-28T16:51:11.778Z",
         "isRead": false
       }
     ]

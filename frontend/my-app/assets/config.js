@@ -1,11 +1,11 @@
 // Determine the API base URL based on platform
 const getApiBaseUrl = () => {
   // Check if running on web
-  if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+  if (typeof window !== 'undefined' && window.location && window.location.hostname === 'localhost') {
     return "http://localhost:5000/api";
   }
   // For mobile/Expo Go, use the network IP
-  return "http://192.168.0.100:5000/api";
+  return "http://192.168.0.185:5000/api";
 };
 
 const config = {
