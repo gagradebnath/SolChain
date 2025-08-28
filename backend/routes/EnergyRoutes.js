@@ -63,13 +63,13 @@ router.get("/", authenticateToken, async (req, res) => {
       "hasSmartMeter": true,
       "hasSolar": true
     }
-  ];
-
-  let ai_predictions = null;
+  ]
+  let energy_predictions = null;
+  let pricing_predictions = null;
   
   try {
-    if (process.env.AI_API_URL) {
-      const response = await fetch(`${process.env.AI_API_URL}/predict/forcast`, {
+    if (process.env.AIML_BASE_URL) {
+      const response = await fetch(`${process.env.AIML_BASE_URL}/predict/forecast`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -79,8 +79,8 @@ router.get("/", authenticateToken, async (req, res) => {
       });
       
       if (response.ok) {
-        ai_predictions = await response.json();
-        console.log("AI Predictions:", ai_predictions);
+        energy_predictions = await response.json();
+        console.log("Energy Predictions:", energy_predictions);
       } else {
         console.error("AI API response error:", response.status, response.statusText);
       }
@@ -89,9 +89,37 @@ router.get("/", authenticateToken, async (req, res) => {
     }
   } catch (error) {
     console.error("Error calling AI API:", error.message);
-    ai_predictions = null;
+    energy_predictions = null;
   }
 
+  try {
+    if (process.env.AIML_BASE_URL) {
+      const response = await fetch(`${process.env.AIML_BASE_URL}/predict/pricing`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${req.user.token || ''}`
+        },
+        body: JSON.stringify(payload)
+      });
+      
+      if (response.ok) {
+        pricing_predictions = await response.json();
+        console.log("Pricing Predictions:", pricing_predictions);
+      } else {
+        console.error("AI API response error:", response.status, response.statusText);
+      }
+    } else {
+      console.log("AI_API_URL not configured, skipping AI predictions");
+    }
+  } catch (error) {
+    console.error("Error calling AI API:", error.message);
+    energy_predictions = null;
+  }
+
+  console.log("Energy Predictions Result:", energy_predictions);
+  console.log("Pricing Predictions Result:", pricing_predictions);
+  
   const realTimeMetrics = realtimeArr.find(d => d.userId === userId);
 
   const battery = batteryArr.find(d => d.userId === userId);
@@ -117,8 +145,8 @@ router.get("/", authenticateToken, async (req, res) => {
   };
 
   console.log("Energy Data fetched by user: ", userId);
-  console.log("AI Predictions Result:", ai_predictions);
-  
+  console.log("Energy Predictions Result:", energy_predictions);
+
   res.json({
     success: true,
     data: {
@@ -129,7 +157,7 @@ router.get("/", authenticateToken, async (req, res) => {
       grid,
       weather,
       historical,
-      aiPredictions: ai_predictions
+      energyPredictions: energy_predictions
     }
   });
 });
