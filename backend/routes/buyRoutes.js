@@ -80,6 +80,7 @@ router.post("/buyNow", authenticateToken, (req, res) => {
   const notificationsArr = getJsonData('notifications.json'); // <- notifications
 
   const sellerIndex = usersArr.findIndex(u => u.id === sellerId);
+  const buyerIndex = usersArr.findIndex(u => u.id === buyer.id);
   const sellerRealtimeIndex = realtimeArr.findIndex(r => r.userId === sellerId);
   const buyerWalletIndex = walletsArr.findIndex(w => w.userId === buyer.id);
   const sellerWalletIndex = walletsArr.findIndex(w => w.userId === sellerId);
@@ -144,7 +145,7 @@ router.post("/buyNow", authenticateToken, (req, res) => {
   const sellerNotification = {
     id: Date.now().toString() + "_s",
     title: 'Energy Sold',
-    message: `${buyer.username} purchased ${amount} kWh from you at $${rate}/kWh.`,
+    message: `${usersArr[buyerIndex].username} purchased ${amount} kWh from you at $${rate}/kWh.`,
     type: 'transaction',
     timestamp: new Date().toISOString(),
     isRead: false
@@ -173,6 +174,7 @@ router.post("/buyNow", authenticateToken, (req, res) => {
 
   const sellerUserIndex = usersArr.findIndex(u => u.id === sellerId);
   usersArr[sellerUserIndex].buying = true;
+  console.log(`User ${buyer.id} purchased ${amount} kWh from user ${sellerId} for $${totalCost}.`);
   // Save all changes
   saveJsonData('realtime.json', realtimeArr);
   saveJsonData('wallets.json', walletsArr);

@@ -1,11 +1,3 @@
-/**
- * Wallet Components
- *
- * SolarToken wallet management and transactions
- *
- * @author Team GreyDevs
- */
-
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Alert, SafeAreaView, ScrollView } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
@@ -16,7 +8,8 @@ import UniversalScrollContainer from '../components/UniversalScrollContainer';
 import styles from '../styles/WalletStyles';
 import config from '../assets/config';
 
-// --- TRANSLATIONS ---
+// The provided translations and helper functions are correct as is.
+
 const translations = {
     en: {
         title: 'My Wallet',
@@ -33,6 +26,7 @@ const translations = {
         hardwareWallet: 'Hardware Wallet',
         recovery: 'Recovery Phrase',
         export: 'Export Wallet',
+        viewAll: 'View All'
     },
     bn: {
         title: 'আমার ওয়ালেট',
@@ -49,9 +43,9 @@ const translations = {
         hardwareWallet: 'হার্ডওয়্যার ওয়ালেট',
         recovery: 'রিকভারি ফ্রেজ',
         export: 'ওয়ালেট এক্সপোর্ট',
+        viewAll: 'সব দেখুন'
     },
 };
-
 
 const getIconForType = (type) => {
     switch (type) {
@@ -82,6 +76,7 @@ export default function WalletScreen() {
     const [walletData, setWalletData] = useState(null);
     const [transactionHistory, setTransactionHistory] = useState([]);
     const [balance, setBalance] = useState(null);
+    const [showAll, setShowAll] = useState(false);
 
     useEffect(() => {
         fetchWalletData();
@@ -101,11 +96,13 @@ export default function WalletScreen() {
             if (!response.ok) {
                 throw new Error(data.error || 'Failed to fetch wallet data');
             }
+            // Sort transactions by date, newest first. The timestamps from the backend are already formatted,
+            // so we'll need to sort them using a common key.
+            // The logic to sort by date in descending order is already there.
+            const sortedTx = [...data.transactions].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
             setWalletData(data.success);
-            setTransactionHistory(data.transactions);
+            setTransactionHistory(sortedTx);
             setBalance(data.balance);
-
-
         } catch (err) {
             console.error("Error fetching wallet data:", err);
             Alert.alert("Error", "Failed to fetch wallet data. Check your network connection.");
@@ -120,7 +117,6 @@ export default function WalletScreen() {
         );
     }
     
-    // --- CORRECTED renderTransactionItem ---
     const renderTransactionItem = ({ item }) => (
         <View style={styles.transactionItem}>
             <Feather 
@@ -131,14 +127,22 @@ export default function WalletScreen() {
             />
             <View style={{ flex: 1 }}>
                 <Text style={styles.transactionTitle}>{item.description}</Text>
-                <Text style={styles.transactionSubtitle}>{item.timestamp}</Text>
+                <Text style={styles.transactionSubtitle}>
+  {new Date(item.timestamp).toLocaleString("en-US", {
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })}
+</Text>
+
             </View>
             <Text style={[styles.transactionAmount, { color: getTxColor(item.type) }]}>
                 {item.value}
             </Text>
         </View>
     );
-
 
     const ActionButton = ({ icon, text, onPress }) => (
         <TouchableOpacity style={styles.actionButton} onPress={onPress}>
@@ -155,48 +159,26 @@ export default function WalletScreen() {
         </TouchableOpacity>
     );
 
-    // --- Dummy Handlers for Navigation ---
     const handleStakingPress = () => {
-        Alert.alert(
-            "Staking",
-            "This will navigate to the staking interface. Here, users can lock their tokens to earn rewards.",
-            [{ text: "OK" }]
-        );
+        Alert.alert("Staking","This will navigate to the staking interface. Here, users can lock their tokens to earn rewards.",[{ text: "OK" }]);
     };
 
     const handleSecurityPress = () => {
-        Alert.alert(
-            "Security Settings",
-            "This will navigate to the security settings. Features like biometric authentication (Face ID/Touch ID) and transaction signing will be managed here.",
-            [{ text: "OK" }]
-        );
+        Alert.alert("Security Settings","This will navigate to the security settings. Features like biometric authentication (Face ID/Touch ID) and transaction signing will be managed here.",[{ text: "OK" }]);
     };
 
     const handleHardwareWalletPress = () => {
-        Alert.alert(
-            "Hardware Wallet",
-            "This will navigate to a page for connecting a hardware wallet (e.g., Ledger, Trezor) via Bluetooth or USB. This requires native module integration.",
-            [{ text: "OK" }]
-        );
+        Alert.alert("Hardware Wallet","This will navigate to a page for connecting a hardware wallet (e.g., Ledger, Trezor) via Bluetooth or USB. This requires native module integration.",[{ text: "OK" }]);
     };
 
     const handleRecoveryPhrasePress = () => {
         const dummyRecoveryPhrase = "dummy phrase for testing only do not use this in a real app";
-        Alert.alert(
-            "Recovery Phrase",
-            `Your 12-word recovery phrase is: \n\n"${dummyRecoveryPhrase}"\n\nWarning: Never share this with anyone. It is the master key to your wallet.`,
-            [{ text: "OK" }]
-        );
+        Alert.alert("Recovery Phrase",`Your 12-word recovery phrase is: \n\n"${dummyRecoveryPhrase}"\n\nWarning: Never share this with anyone. It is the master key to your wallet.`,[{ text: "OK" }]);
     };
 
     const handleExportWalletPress = () => {
-        Alert.alert(
-            "Export Wallet",
-            "This will guide the user through exporting their wallet. This could involve generating a QR code or a file with the encrypted private key.",
-            [{ text: "OK" }]
-        );
+        Alert.alert("Export Wallet","This will guide the user through exporting their wallet. This could involve generating a QR code or a file with the encrypted private key.",[{ text: "OK" }]);
     };
-
 
     return (
         <UniversalSafeArea style={styles.safeArea}>
@@ -212,21 +194,18 @@ export default function WalletScreen() {
                 style={styles.container}
                 contentContainerStyle={{ paddingBottom: 30 }}
             >
-                {/* WalletOverview - Main Balance Display */}
                 <View style={[styles.balanceCard, styles.cardShadow]}>
                     <Text style={styles.balanceLabel}>{t.balance}</Text>
                     <Text style={styles.solBalance}>{balance?.solarToken}</Text>
                     <Text style={styles.energyCredits}>{balance?.energyCredits} {t.energyCredits}</Text>
                 </View>
 
-                {/* Send, Receive, Swap Actions */}
                 <View style={styles.walletActions}>
                     <ActionButton icon="arrow-up" text={t.send} onPress={() => Alert.alert("Send", "Navigate to Send screen")} />
                     <ActionButton icon="arrow-down" text={t.receive} onPress={() => Alert.alert("Receive", "Navigate to Receive screen")} />
                     <ActionButton icon="repeat" text={t.swap} onPress={() => Alert.alert("Swap", "Navigate to Swap screen")} />
                 </View>
 
-                {/* Fiat Payment Gateway (bKash) */}
                 <View style={[styles.paymentCard, styles.cardShadow]}>
                     <Feather name="shopping-bag" size={24} color="#007AFF" />
                     <View style={styles.paymentTextContainer}>
@@ -236,21 +215,27 @@ export default function WalletScreen() {
                     <Feather name="chevron-right" size={24} color="#007AFF" />
                 </View>
 
-                {/* TransactionHistory */}
                 <Text style={styles.sectionTitle}>{t.transactions}</Text>
                 {transactionHistory.length > 0 ? (
-                    <FlatList
-                        data={transactionHistory}
-                        renderItem={renderTransactionItem}
-                        keyExtractor={item => item.id}
-                        scrollEnabled={false}
-                    />
+                    <>
+                        <FlatList
+                            // Displays only the first 5 transactions unless showAll is true
+                            data={showAll ? transactionHistory : transactionHistory.slice(0, 5)}
+                            renderItem={renderTransactionItem}
+                            keyExtractor={item => item.id}
+                            scrollEnabled={false}
+                        />
+                        {/* Only show "View All" button if there are more than 5 transactions */}
+                        {!showAll && transactionHistory.length > 5 && (
+                            <TouchableOpacity onPress={() => setShowAll(true)}>
+                                <Text style={{ color: "#007AFF", marginTop: 10, textAlign: "center" }}>{t.viewAll}</Text>
+                            </TouchableOpacity>
+                        )}
+                    </>
                 ) : (
                     <Text style={styles.noTransactionsText}>No transactions found.</Text>
                 )}
 
-
-                {/* Additional Functions as a separate settings section */}
                 <Text style={styles.sectionTitle}>More Options</Text>
                 <View style={[styles.settingsCard, styles.cardShadow]}>
                     <SettingsButton icon="zap" text={t.staking} onPress={handleStakingPress} />
