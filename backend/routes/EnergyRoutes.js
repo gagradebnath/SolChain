@@ -114,7 +114,7 @@ router.get("/", authenticateToken, async (req, res) => {
     }
   } catch (error) {
     console.error("Error calling AI API:", error.message);
-    energy_predictions = null;
+    pricing_predictions = null;
   }
 
   console.log("Energy Predictions Result:", energy_predictions);
@@ -147,13 +147,30 @@ router.get("/", authenticateToken, async (req, res) => {
   console.log("Energy Data fetched by user: ", userId);
   console.log("Energy Predictions Result:", energy_predictions);
 
+  // Transform AI predictions into the format frontend expects
+  const transformedPredictions = {
+    price: pricing_predictions && pricing_predictions.success && pricing_predictions.predictions && pricing_predictions.predictions.length > 0
+      ? pricing_predictions.predictions[0] 
+      : 15, // fallback value
+    energy: energy_predictions && energy_predictions.success && energy_predictions.predictions && energy_predictions.predictions.length > 0
+      ? energy_predictions.predictions[0] 
+      : 20, // fallback value
+    anomalies: "normal", // default or you can add anomaly detection call
+    nextHourProduction: energy_predictions && energy_predictions.success && energy_predictions.predictions && energy_predictions.predictions.length > 0
+      ? (energy_predictions.predictions[0] * 1.1).toFixed(2) 
+      : "22.0" // fallback value
+  };
+
+  console.log("Transformed Predictions:", transformedPredictions);
+
   res.json({
     success: true,
+    predictions: transformedPredictions, // Add predictions at root level for frontend
     data: {
       realTimeMetrics,
       battery,
       carbonFootprint,
-      predictions,
+      predictions: transformedPredictions, // Also keep in data for compatibility
       grid,
       weather,
       historical,

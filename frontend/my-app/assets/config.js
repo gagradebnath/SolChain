@@ -5,7 +5,7 @@ const getApiBaseUrl = () => {
     return "http://localhost:5000/api";
   }
   // For mobile/Expo Go, use the network IP
-  return "http://192.168.0.176:5000/api";
+  return "http://192.168.0.103:5000/api";
 };
 
 const config = {
