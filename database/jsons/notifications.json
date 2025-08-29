@@ -32,7 +32,7 @@
         "message": "Your trade for 5 kWh has been executed.",
         "type": "trade",
         "timestamp": "2025-08-25T08:30:00Z",
-        "isRead": false
+        "isRead": true
       },
       {
         "id": "n5",
@@ -51,6 +51,7 @@
         "isRead": false
       },
       {
+
         "id": "1756399523819_b",
         "title": "Purchase Successful",
         "message": "You purchased 1.5 kWh from BinaA at $0.24/kWh.",
@@ -96,6 +97,7 @@
         "message": "You listed 20 kWh at $0.2/kWh on the market.",
         "type": "trade",
         "timestamp": "2025-08-28T17:47:56.379Z",
+
         "isRead": false
       }
     ]
@@ -120,11 +122,13 @@
         "isRead": true
       },
       {
+
         "id": "1756401858700_s",
         "title": "Energy Sold",
         "message": "undefined purchased 1.2 kWh from you at $0.24/kWh.",
         "type": "transaction",
         "timestamp": "2025-08-28T17:24:18.700Z",
+
         "isRead": false
       }
     ]
@@ -196,7 +200,7 @@
         "message": "You received 10 kWh from user2.",
         "type": "transaction",
         "timestamp": "2025-08-24T18:10:00Z",
-        "isRead": false
+        "isRead": true
       },
       {
         "id": "1756143811264_b",
@@ -215,6 +219,7 @@
         "isRead": false
       },
       {
+
         "id": "1756399769674_b",
         "title": "Purchase Successful",
         "message": "You purchased 10 kWh from JohnDoe at $0.25/kWh.",
@@ -236,6 +241,7 @@
         "message": "undefined purchased 25 kWh from you at $0.26/kWh.",
         "type": "transaction",
         "timestamp": "2025-08-28T17:44:41.118Z",
+
         "isRead": false
       }
     ]

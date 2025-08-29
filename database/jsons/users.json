@@ -111,7 +111,7 @@
     "id": "2505",
     "username": "FahimH",
     "address": "chalkpota,sherpur,Bogura",
-    "buying": true,
+    "buying": false,
     "rate": "0.26 SOL/kWh",
     "email": "fahim@example.com",
     "passwordHash": "$2b$10$daPQpE3YdMzIFo8x1DKa5uyfh.0F3o5n5FEmBZ5GykKOqnLPIx/2q",

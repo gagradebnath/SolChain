@@ -9,7 +9,9 @@ const getApiBaseUrl = () => {
 };
 
 const config = {
+
   API_BASE_URL: getApiBaseUrl(),
+
   timeout: 5000,
   retries: 3
 };

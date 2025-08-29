@@ -34,6 +34,50 @@ function getJsonData(filename) {
   }
 }
 
+// // --- ROUTE: GET /wallet ---
+// router.get("/", authenticateToken, (req, res) => {
+//   const userId = req.user.id;
+
+//   // Load JSONs
+//   const transactionsArr = getJsonData('transactions.json');
+//   const walletsArr = getJsonData('wallets.json');
+//   const usersArr = getJsonData('users.json');
+
+//   // Helper to get username by userId
+//   const getUsername = (id) => usersArr.find(u => u.id === id)?.username || id;
+
+//   // Filter transactions for this user
+//   const userTransactions = transactionsArr
+//     .filter(tx => tx.from === userId || tx.to === userId)
+//     .map(tx => {
+//       const isSender = tx.from === userId;
+//       const counterpartyName = getUsername(isSender ? tx.to : tx.from);
+//       return {
+//         id: tx.id,
+//         type: tx.from === userId ? "sell" : "buy",
+//         description: isSender
+//           ? `Sold ${tx.amount} ${tx.unit} to ${counterpartyName}`
+//           : `Bought ${tx.amount} ${tx.unit} from ${counterpartyName}`,
+//         timestamp: new Date(tx.timestamp).toLocaleTimeString("en-US", { hour: '2-digit', minute: '2-digit' }),
+//         value: isSender ? `+${tx.tokenValue} SOL` : `-${tx.tokenValue} SOL`
+//       };
+//     });
+
+//   // Get user wallet
+//   const userWallet = walletsArr.find(w => w.userId === userId) || { balance: 0, energyCredits: 0 };
+//   const balance = {
+//     solarToken: `${userWallet.balance} SOL`,
+//     energyCredits: `${userWallet.energyCredits}`
+//   };
+
+//   res.json({
+//     success: true,
+//     transactions: userTransactions,
+//     balance
+//   });
+// });
+
+// module.exports = router;
 // --- ROUTE: GET /wallet ---
 router.get("/", authenticateToken, (req, res) => {
   const userId = req.user.id;
@@ -58,7 +102,8 @@ router.get("/", authenticateToken, (req, res) => {
         description: isSender
           ? `Sold ${tx.amount} ${tx.unit} to ${counterpartyName}`
           : `Bought ${tx.amount} ${tx.unit} from ${counterpartyName}`,
-        timestamp: new Date(tx.timestamp).toLocaleTimeString("en-US", { hour: '2-digit', minute: '2-digit' }),
+        // Changed this line to return the full date and time
+        timestamp: tx.timestamp,
         value: isSender ? `+${tx.tokenValue} SOL` : `-${tx.tokenValue} SOL`
       };
     });

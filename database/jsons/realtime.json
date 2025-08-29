@@ -3,8 +3,10 @@
     "userId": "2501",
     "timestamp": "2025-08-25T10:00:00Z",
     "production": 5.2,
+
     "available": 30.7,
     "onMarket": 21,
+
     "consumption": 3.1,
     "gridFeedIn": 2.1,
     "batteryCharge": 0.5,
@@ -59,8 +61,10 @@
     "userId": "2505",
     "timestamp": "2025-08-25T10:00:00Z",
     "production": 4,
+
     "available": 7.8,
     "onMarket": 0,
+
     "consumption": 2.8,
     "gridFeedIn": 1.2,
     "batteryCharge": 0.3,
