@@ -849,6 +849,42 @@ export default function EnergyDashboardScreen() {
           </View>
         </View>
 
+        <View style={[styles.card, styles.cardShadow]}>
+          <Text style={styles.sectionTitle}>{t.predictions}</Text>
+          <View style={styles.predictionsContainer}>
+            {renderPredictionCard(
+              "dollar-sign",
+              t.price,
+              parseFloat(energyData.predictions.price).toFixed(2),
+              "",
+              "#4CAF50"
+            )}
+            {renderPredictionCard(
+              "alert-triangle",
+              t.anomalies,
+              energyData.predictions.anomalies,
+              "",
+              energyData.predictions.anomalies === "normal" ? "#2ECC71" : "#E74C3C",
+              energyData.predictions.anomalies === "normal" ? "#2ECC71" : "#E74C3C"
+            )}
+            {renderPredictionCard(
+              "zap",
+              t.energy,
+              parseFloat(energyData.predictions.energy).toFixed(2),
+              "kWh",
+              "#2196F3"
+            )}
+            {renderPredictionCard(
+              "clock",
+              t.nextHour,
+              energyData.data.predictions.nextHourProduction,
+              "kWh",
+              "#9C27B0"
+            )}
+
+          </View>
+        </View>
+
         <View style={styles.twoColumnContainer}>
           <View style={[styles.card, styles.cardShadow, styles.columnCard]}>
             <Text style={styles.sectionTitle}>{t.batteryStatus}</Text>
@@ -953,47 +989,7 @@ export default function EnergyDashboardScreen() {
           </View>
         </View>
 
-        <View style={[styles.card, styles.cardShadow]}>
-          <Text style={styles.sectionTitle}>{t.predictions}</Text>
-          <View style={styles.predictionsContainer}>
-            {renderPredictionCard(
-              "dollar-sign",
-              t.price,
-              parseFloat(energyData.predictions.price).toFixed(2),
-              "",
-              "#4CAF50"
-            )}
-            {renderPredictionCard(
-              "alert-triangle",
-              t.anomalies,
-              energyData.predictions.anomalies,
-              "",
-              energyData.predictions.anomalies === "normal" ? "#2ECC71" : "#E74C3C",
-              energyData.predictions.anomalies === "normal" ? "#2ECC71" : "#E74C3C"
-            )}
-            {renderPredictionCard(
-              "zap",
-              t.energy,
-              parseFloat(energyData.predictions.energy).toFixed(2),
-              "kWh",
-              "#2196F3"
-            )}
-            {renderPredictionCard(
-              "clock",
-              t.nextHour,
-              energyData.data.predictions.nextHourProduction,
-              "kWh",
-              "#9C27B0"
-            )}
-            {renderPredictionCard(
-              "activity",
-              t.peakTime,
-              energyData.data.predictions.peakTime,
-              "",
-              "#FFC107"
-            )}
-          </View>
-        </View>
+        
 
         <TouchableOpacity style={styles.exportButton} onPress={handleExportPdf}>
           <Feather name="download" size={20} color="#fff" />
