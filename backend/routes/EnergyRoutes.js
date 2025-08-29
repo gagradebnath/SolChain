@@ -45,28 +45,51 @@ router.get("/", authenticateToken, async (req, res) => {
   const gridArr = getJsonData('grid.json');        // global
   const weatherArr = getJsonData('weather.json');  // global
   const historicalArr = getJsonData('historical.json'); 
-  
-  const payload = [
-    {
-      "deviceId": "DEVICE_001",
-      "deviceType": "residential_small",
-      "consumption": 500.2,
-      "production": 2.1,
-      "temperature": 25.5,
-      "humidity": 0.6,
-      "solarIrradiance": 600.0,
-      "windSpeed": 3.2,
-      "hour": 24,
-      "dayOfWeek": 2,
-      "month": 8,
-      "isWeekend": false,
-      "hasSmartMeter": true,
-      "hasSolar": true
-    }
-  ]
+  const payloadArr = getJsonData('payload.json'); 
+  // console.log(payloadArr)
+  const payload = payloadArr[userId] || [];
+  console.log(payload)
+  // const payload0 = [
+  //   {
+  //     "deviceId": "DEVICE_001",
+  //     "deviceType": "residential_small",
+  //     "consumption": 5.2,
+  //     "production": 2.1,
+  //     "temperature": 25.5,
+  //     "humidity": 0.6,
+  //     "solarIrradiance": 600.0,
+  //     "windSpeed": 3.2,
+  //     "hour": 24,
+  //     "dayOfWeek": 2,
+  //     "month": 8,
+  //     "isWeekend": false,
+  //     "hasSmartMeter": true,
+  //     "hasSolar": true
+  //   }
+  // ]
+
+  // const payload1 = [
+  //   {
+  //     "deviceId": "DEVICE_002",
+  //     "deviceType": "residential_small",
+  //     "consumption": 5.3,
+  //     "production": 3.1,
+  //     "temperature": 15.5,
+  //     "humidity": 0.6,
+  //     "solarIrradiance": 600.0,
+  //     "windSpeed": 3.2,
+  //     "hour": 24,
+  //     "dayOfWeek": 2,
+  //     "month": 8,
+  //     "isWeekend": false,
+  //     "hasSmartMeter": true,
+  //     "hasSolar": true
+  //   }
+  // ]
+
   let energy_predictions = null;
   let pricing_predictions = null;
-  
+  let anomaly_predictions = null;
   try {
     if (process.env.AIML_BASE_URL) {
       const response = await fetch(`${process.env.AIML_BASE_URL}/predict/forecast`, {
@@ -75,7 +98,7 @@ router.get("/", authenticateToken, async (req, res) => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${req.user.token || ''}`
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify([payload])
       });
       
       if (response.ok) {
@@ -100,7 +123,7 @@ router.get("/", authenticateToken, async (req, res) => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${req.user.token || ''}`
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify([payload])
       });
       
       if (response.ok) {
@@ -117,9 +140,35 @@ router.get("/", authenticateToken, async (req, res) => {
     energy_predictions = null;
   }
 
+  try {
+    if(process.env.AIML_BASE_URL) {
+      const response = await fetch(`${process.env.AIML_BASE_URL}/predict/anomaly`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${req.user.token || ''}`
+        },
+        body: JSON.stringify([payload])
+      });
+
+      if (response.ok) {
+        anomaly_predictions = await response.json();
+        console.log("Anomaly Predictions:", anomaly_predictions);
+      } else {
+        console.error("AI API response error:", response.status, response.statusText);
+      }
+    } else {
+      console.log("AI_API_URL not configured, skipping AI predictions");
+    }
+  } catch (error) {
+    console.error("Error calling AI API:", error.message);
+    anomaly_predictions = null;
+  }
+
   console.log("Energy Predictions Result:", energy_predictions);
   console.log("Pricing Predictions Result:", pricing_predictions);
-  
+  console.log("Anomaly Predictions Result:", anomaly_predictions);
+
   const realTimeMetrics = realtimeArr.find(d => d.userId === userId);
 
   const battery = batteryArr.find(d => d.userId === userId);
@@ -147,6 +196,10 @@ router.get("/", authenticateToken, async (req, res) => {
   console.log("Energy Data fetched by user: ", userId);
   console.log("Energy Predictions Result:", energy_predictions);
 
+  const price = pricing_predictions.predictions ? pricing_predictions.predictions[0] : null;
+  const anomalies = anomaly_predictions.metadata.anomaly_flags ? anomaly_predictions.metadata.anomaly_flags[0] : null;
+  const energy = energy_predictions.predictions ? energy_predictions.predictions[0] : null;
+  console.log(price, anomalies, energy)
   res.json({
     success: true,
     data: {
@@ -157,7 +210,15 @@ router.get("/", authenticateToken, async (req, res) => {
       grid,
       weather,
       historical,
-      energyPredictions: energy_predictions
+      // energyPredictions: energy_predictions,
+      price,
+      anomalies,
+      energy
+    },
+    predictions: {
+      price,
+      anomalies,
+      energy
     }
   });
 });
