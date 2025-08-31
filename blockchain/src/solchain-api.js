@@ -627,11 +627,32 @@ class SolChainAPI {
             if (!this.contracts.EnergyTrading) {
                 throw new Error("EnergyTrading contract not initialized");
             }
+            if (!this.contracts.SolarToken) {
+                throw new Error("SolarToken contract not initialized");
+            }
 
             const energyAmountWei = ethers.parseEther(energyAmount.toString());
             const priceWei = ethers.parseEther(pricePerKwh.toString());
             const deadlineTimestamp = Math.floor(new Date(deadline).getTime() / 1000);
 
+            // Calculate equivalent ETH amount for the energy being bought
+            const equivalentETH = await this.contracts.SolarToken.calculateETHAmount(energyAmountWei);
+            
+            // Get nonces for sequential transactions
+            const depositNonce = await this.getNextNonce();
+            const offerNonce = await this.getNextNonce();
+            
+            // Deposit equivalent ETH to SolarToken contract
+            const depositTx = await this.contracts.SolarToken.depositETH({
+                value: equivalentETH,
+                gasLimit: this.config.gasLimit,
+                nonce: depositNonce
+            });
+            
+            // Wait for deposit transaction to confirm
+            const depositReceipt = await depositTx.wait();
+
+            // Create the buy offer
             const tx = await this.contracts.EnergyTrading.createOffer(
                 1, // OfferType.BUY
                 energyAmountWei,
@@ -640,7 +661,8 @@ class SolChainAPI {
                 location,
                 energySource,
                 {
-                    gasLimit: this.config.gasLimit
+                    gasLimit: this.config.gasLimit,
+                    nonce: offerNonce
                 }
             );
 
@@ -650,8 +672,10 @@ class SolChainAPI {
                 success: true,
                 data: {
                     transactionHash: tx.hash,
+                    depositTransactionHash: depositTx.hash,
                     blockNumber: receipt.blockNumber,
                     gasUsed: receipt.gasUsed.toString(),
+                    ethDeposited: ethers.formatEther(equivalentETH),
                     energyAmount: energyAmount.toString(),
                     pricePerKwh: pricePerKwh.toString(),
                     deadline,
@@ -674,9 +698,11 @@ class SolChainAPI {
             }
 
             const energyAmountWei = ethers.parseEther(energyAmount.toString());
+            const nonce = await this.getNextNonce();
 
             const tx = await this.contracts.EnergyTrading.acceptOffer(offerId, energyAmountWei, {
-                gasLimit: this.config.gasLimit
+                gasLimit: this.config.gasLimit,
+                nonce: nonce
             });
 
             const receipt = await tx.wait();
@@ -1342,6 +1368,128 @@ class SolChainAPI {
     }
 
     // ============================================================================
+    // ETH DEPOSIT MANAGEMENT
+    // ============================================================================
+
+    /**
+     * Deposit ETH to SolarToken contract for ETH transfers
+     */
+    async depositETH(amountInEther) {
+        try {
+            if (!this.contracts.SolarToken) {
+                throw new Error("SolarToken contract not initialized");
+            }
+
+            const amountWei = ethers.parseEther(amountInEther.toString());
+            const nonce = await this.getNextNonce();
+
+            const tx = await this.contracts.SolarToken.depositETH({
+                value: amountWei,
+                gasLimit: this.config.gasLimit,
+                nonce: nonce
+            });
+
+            const receipt = await tx.wait();
+
+            return {
+                success: true,
+                data: {
+                    transactionHash: tx.hash,
+                    blockNumber: receipt.blockNumber,
+                    gasUsed: receipt.gasUsed.toString(),
+                    amountDeposited: amountInEther.toString(),
+                    amountWei: amountWei.toString()
+                }
+            };
+        } catch (error) {
+            return { success: false, error: error.message };
+        }
+    }
+
+    /**
+     * Get ETH deposit balance for an address
+     */
+    async getETHDepositBalance(address) {
+        try {
+            if (!this.contracts.SolarToken) {
+                throw new Error("SolarToken contract not initialized");
+            }
+
+            const balance = await this.contracts.SolarToken.getETHDeposit(address);
+
+            return {
+                success: true,
+                data: {
+                    address,
+                    balance: ethers.formatEther(balance),
+                    balanceWei: balance.toString()
+                }
+            };
+        } catch (error) {
+            return { success: false, error: error.message };
+        }
+    }
+
+    /**
+     * Withdraw ETH deposit from SolarToken contract
+     */
+    async withdrawETHDeposit(amountInEther) {
+        try {
+            if (!this.contracts.SolarToken) {
+                throw new Error("SolarToken contract not initialized");
+            }
+
+            const amountWei = ethers.parseEther(amountInEther.toString());
+            const nonce = await this.getNextNonce();
+
+            const tx = await this.contracts.SolarToken.withdrawETH(amountWei, {
+                gasLimit: this.config.gasLimit,
+                nonce: nonce
+            });
+
+            const receipt = await tx.wait();
+
+            return {
+                success: true,
+                data: {
+                    transactionHash: tx.hash,
+                    blockNumber: receipt.blockNumber,
+                    gasUsed: receipt.gasUsed.toString(),
+                    amountWithdrawn: amountInEther.toString(),
+                    amountWei: amountWei.toString()
+                }
+            };
+        } catch (error) {
+            return { success: false, error: error.message };
+        }
+    }
+
+    /**
+     * Calculate equivalent ETH amount for token amount
+     */
+    async calculateETHEquivalent(tokenAmount) {
+        try {
+            if (!this.contracts.SolarToken) {
+                throw new Error("SolarToken contract not initialized");
+            }
+
+            const tokenAmountWei = ethers.parseEther(tokenAmount.toString());
+            const ethAmount = await this.contracts.SolarToken.calculateETHAmount(tokenAmountWei);
+
+            return {
+                success: true,
+                data: {
+                    tokenAmount: tokenAmount.toString(),
+                    ethEquivalent: ethers.formatEther(ethAmount),
+                    ethEquivalentWei: ethAmount.toString()
+                }
+            };
+        } catch (error) {
+            return { success: false, error: error.message };
+        }
+    }
+
+    // ============================================================================
     // EVENT LISTENING
     // ============================================================================
 
@@ -1353,6 +1501,19 @@ class SolChainAPI {
             // Token events
             if (this.contracts.SolarToken && eventHandlers.tokenTransfer) {
                 this.contracts.SolarToken.on("Transfer", eventHandlers.tokenTransfer);
+            }
+
+            // ETH deposit events
+            if (this.contracts.SolarToken && eventHandlers.ethDeposited) {
+                this.contracts.SolarToken.on("ETHDeposited", eventHandlers.ethDeposited);
+            }
+
+            if (this.contracts.SolarToken && eventHandlers.ethWithdrawn) {
+                this.contracts.SolarToken.on("ETHWithdrawn", eventHandlers.ethWithdrawn);
+            }
+
+            if (this.contracts.SolarToken && eventHandlers.ethTransferred) {
+                this.contracts.SolarToken.on("ETHTransferred", eventHandlers.ethTransferred);
             }
 
             // Trading events

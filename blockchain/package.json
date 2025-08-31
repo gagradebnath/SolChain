@@ -12,13 +12,15 @@
     "test": "hardhat test",
     "test:eth": "hardhat test test/SolarToken-ETH-Transfer.test.js --network localhost",
     "test:coverage": "hardhat coverage",
+    "test:buy-offer": "node test-eth-buy-offer.js",
     "verify": "hardhat verify",
     "node": "hardhat node",
     "console": "hardhat console",
     "flatten": "hardhat flatten",
     "clean": "hardhat clean",
     "size": "hardhat size-contracts",
-    "demo:dual": "npm run deploy:dual && npm run test:eth"
+    "demo:dual": "npm run deploy:dual && npm run test:eth",
+    "demo:buy-offer": "npm run deploy:localhost && npm run test:buy-offer"
   },
   "dependencies": {
     "@chainlink/contracts": "^0.8.0",
