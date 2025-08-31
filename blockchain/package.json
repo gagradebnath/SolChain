@@ -8,14 +8,17 @@
     "deploy:localhost": "hardhat run scripts/deploy.js --network localhost",
     "deploy:testnet": "hardhat run scripts/deploy.js --network testnet",
     "deploy:mainnet": "hardhat run scripts/deploy.js --network mainnet",
+    "deploy:dual": "hardhat run scripts/deploy-dual-asset-demo.js --network localhost",
     "test": "hardhat test",
+    "test:eth": "hardhat test test/SolarToken-ETH-Transfer.test.js --network localhost",
     "test:coverage": "hardhat coverage",
     "verify": "hardhat verify",
     "node": "hardhat node",
     "console": "hardhat console",
     "flatten": "hardhat flatten",
     "clean": "hardhat clean",
-    "size": "hardhat size-contracts"
+    "size": "hardhat size-contracts",
+    "demo:dual": "npm run deploy:dual && npm run test:eth"
   },
   "dependencies": {
     "@chainlink/contracts": "^0.8.0",

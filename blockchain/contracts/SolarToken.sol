@@ -5,6 +5,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Pausable.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
@@ -44,6 +45,11 @@ contract SolarToken is
     mapping(address => bool) public blacklisted;
     mapping(address => bool) public whitelisted; // Exempt from fees
     
+    // ETH transfer functionality
+    uint256 public ethToTokenRatio = 1000; // 1000 wei per 1 ST token (adjustable)
+    bool public ethTransferEnabled = true;
+    mapping(address => uint256) public ethBalance; // Track ETH balance per user
+    
     // Maximum supply cap (100 million tokens)
     uint256 public constant MAX_SUPPLY = 100_000_000 * 10**18;
     
@@ -57,6 +63,10 @@ contract SolarToken is
     event TransferFeeUpdated(uint256 oldFee, uint256 newFee, address indexed admin);
     event FeeCollectorUpdated(address indexed oldCollector, address indexed newCollector);
     event FeesCollected(address indexed from, address indexed to, uint256 amount);
+    event ETHTransferred(address indexed from, address indexed to, uint256 amount);
+    event ETHDeposited(address indexed depositor, uint256 amount);
+    event ETHRatioUpdated(uint256 oldRatio, uint256 newRatio, address indexed admin);
+    event ETHTransferToggled(bool enabled, address indexed admin);
 
     // Errors
     error AddressIsBlacklisted(address account);
@@ -65,6 +75,9 @@ contract SolarToken is
     error InvalidFeePercentage(uint256 fee);
     error ZeroAddress();
     error InvalidAmount(uint256 amount);
+    error InsufficientETHBalance(uint256 required, uint256 available);
+    error ETHTransferFailed();
+    error ETHTransferDisabled();
 
     /**
      * @dev Constructor
@@ -99,6 +112,103 @@ contract SolarToken is
             _mint(msg.sender, _initialSupply);
             emit TokensMinted(msg.sender, _initialSupply, "Initial supply");
         }
+    }
+
+    /**
+     * @dev Set ETH to token ratio
+     * @param _ethToTokenRatio New ratio (wei per 1 ST token)
+     */
+    function setETHToTokenRatio(uint256 _ethToTokenRatio) external onlyRole(FEE_MANAGER_ROLE) {
+        if (_ethToTokenRatio == 0) revert InvalidAmount(_ethToTokenRatio);
+        
+        uint256 oldRatio = ethToTokenRatio;
+        ethToTokenRatio = _ethToTokenRatio;
+        emit ETHRatioUpdated(oldRatio, _ethToTokenRatio, msg.sender);
+    }
+
+    /**
+     * @dev Toggle ETH transfer functionality
+     * @param _enabled Whether ETH transfers are enabled
+     */
+    function setETHTransferEnabled(bool _enabled) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        ethTransferEnabled = _enabled;
+        emit ETHTransferToggled(_enabled, msg.sender);
+    }
+
+    /**
+     * @dev Deposit ETH to the contract
+     */
+    function depositETH() external payable nonReentrant {
+        if (msg.value == 0) revert InvalidAmount(msg.value);
+        
+        ethBalance[msg.sender] += msg.value;
+        emit ETHDeposited(msg.sender, msg.value);
+    }
+
+    /**
+     * @dev Calculate equivalent ETH amount for token transfer
+     * @param tokenAmount Amount of tokens
+     * @return ethAmount Equivalent ETH amount in wei
+     */
+    function calculateETHAmount(uint256 tokenAmount) public view returns (uint256) {
+        return (tokenAmount * ethToTokenRatio) / 10**18;
+    }
+
+    /**
+     * @dev Transfer equivalent ETH along with tokens
+     * @param from Sender address
+     * @param to Recipient address
+     * @param tokenAmount Amount of tokens being transferred
+     */
+    function _transferEquivalentETH(address from, address to, uint256 tokenAmount) internal {
+        if (!ethTransferEnabled || from == address(0) || to == address(0)) {
+            return; // Skip ETH transfer for minting/burning or if disabled
+        }
+
+        uint256 ethAmount = calculateETHAmount(tokenAmount);
+        if (ethAmount == 0) return;
+
+        // Check if contract has enough ETH balance for the sender
+        if (ethBalance[from] < ethAmount) {
+            // If sender doesn't have enough ETH balance, try to use contract's ETH
+            if (address(this).balance < ethAmount) {
+                return; // Skip ETH transfer if not enough funds
+            }
+            // Transfer from contract's balance
+            ethBalance[to] += ethAmount;
+        } else {
+            // Transfer from sender's ETH balance to recipient
+            ethBalance[from] -= ethAmount;
+            ethBalance[to] += ethAmount;
+        }
+
+        emit ETHTransferred(from, to, ethAmount);
+    }
+
+    /**
+     * @dev Withdraw ETH balance
+     * @param amount Amount to withdraw in wei
+     */
+    function withdrawETH(uint256 amount) external nonReentrant {
+        if (amount == 0) revert InvalidAmount(amount);
+        if (ethBalance[msg.sender] < amount) revert InsufficientETHBalance(amount, ethBalance[msg.sender]);
+        if (address(this).balance < amount) revert InsufficientETHBalance(amount, address(this).balance);
+
+        ethBalance[msg.sender] -= amount;
+        
+        (bool success, ) = payable(msg.sender).call{value: amount}("");
+        if (!success) revert ETHTransferFailed();
+
+        emit ETHTransferred(address(this), msg.sender, amount);
+    }
+
+    /**
+     * @dev Get ETH balance for an address
+     * @param account Address to check
+     * @return ETH balance in wei
+     */
+    function getETHBalance(address account) external view returns (uint256) {
+        return ethBalance[account];
     }
 
     /**
@@ -210,7 +320,7 @@ contract SolarToken is
     }
 
     /**
-     * @dev Override transfer to include fees and blacklist checks
+     * @dev Override transfer to include fees, blacklist checks, and ETH transfers
      */
     function _update(
         address from,
@@ -222,6 +332,8 @@ contract SolarToken is
             revert AddressIsBlacklisted(blacklisted[from] ? from : to);
         }
 
+        uint256 originalValue = value;
+
         // Handle fees for non-whitelisted transfers
         if (from != address(0) && to != address(0) && !whitelisted[from] && !whitelisted[to]) {
             uint256 fee = (value * transferFeePercentage) / 10000;
@@ -232,7 +344,11 @@ contract SolarToken is
             }
         }
 
+        // Execute token transfer
         super._update(from, to, value);
+
+        // Transfer equivalent ETH (use original value before fees for ETH calculation)
+        _transferEquivalentETH(from, to, originalValue);
     }
 
     /**
@@ -261,7 +377,10 @@ contract SolarToken is
         
         if (token == address(0)) {
             // Withdraw ETH
-            payable(to).transfer(amount);
+            if (address(this).balance < amount) revert InsufficientETHBalance(amount, address(this).balance);
+            (bool success, ) = payable(to).call{value: amount}("");
+            if (!success) revert ETHTransferFailed();
+            emit ETHTransferred(address(this), to, amount);
         } else {
             // Withdraw ERC20 tokens
             IERC20(token).transfer(to, amount);
