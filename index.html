@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Links as Cards</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #fdfbfb, #ebedee);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .card-container {
+      display: flex;
+      gap: 25px;
+      flex-wrap: wrap;
+      justify-content: center;
+      width: 100%;
+      max-width: 900px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+      padding: 30px 20px;
+      flex: 1 1 260px; /* flexible width */
+      max-width: 320px;
+      text-align: center;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.2);
+    }
+
+    .card i {
+      font-size: 48px;
+      margin-bottom: 15px;
+      color: #ff6600;
+    }
+
+    .card h3 {
+      margin-bottom: 18px;
+      font-size: 1.3rem;
+      color: #222;
+    }
+
+    .card a {
+      display: inline-block;
+      padding: 12px 20px;
+      background: linear-gradient(135deg, #ff6600, #ff8533);
+      color: #fff;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 0.95rem;
+      transition: background 0.3s, transform 0.2s;
+    }
+
+    .card a:hover {
+      background: linear-gradient(135deg, #e65c00, #ff751a);
+      transform: scale(1.05);
+    }
+
+    /* Responsive tweaks */
+    @media (max-width: 768px) {
+      .card-container {
+        flex-direction: column;
+        align-items: center;
+      }
+      .card {
+        width: 100%;
+        max-width: 400px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .card {
+        padding: 20px 15px;
+      }
+      .card i {
+        font-size: 40px;
+      }
+      .card h3 {
+        font-size: 1.1rem;
+      }
+      .card a {
+        font-size: 0.9rem;
+        padding: 10px 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="card-container">
+    <div class="card">
+      <i class="fas fa-video"></i>
+      <h3>Prototype Video</h3>
+      <a href="https://drive.google.com/file/d/1_IGE4onA8p3SmI1jufkLhK26H0HvtX7v/view?usp=sharing" target="_blank">
+        Watch Now
+      </a>
+    </div>
+    <div class="card">
+      <i class="fab fa-github"></i>
+      <h3>GitHub Repository</h3>
+      <a href="https://github.com/gagradebnath/SolChain" target="_blank">
+        View Repo
+      </a>
+    </div>
+  </div>
+</body>
+</html>
