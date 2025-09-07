@@ -2,38 +2,36 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Links as Cards</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SolChain - Links Portal</title>
+  
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background: linear-gradient(135deg, #fdfbfb, #ebedee);
-      display: flex;
-      justify-content: center;
-      align-items: center;
       min-height: 100vh;
-      margin: 0;
-      padding: 20px;
     }
 
-    .card-container {
+    .main-container {
+      min-height: 100vh;
       display: flex;
-      gap: 25px;
-      flex-wrap: wrap;
+      align-items: center;
       justify-content: center;
-      width: 100%;
-      max-width: 900px;
+      padding: 2rem 0;
     }
 
     .card {
-      background: #fff;
+      border: none;
       border-radius: 16px;
       box-shadow: 0 6px 12px rgba(0,0,0,0.1);
-      padding: 30px 20px;
-      flex: 1 1 260px; /* flexible width */
-      max-width: 320px;
-      text-align: center;
       transition: transform 0.25s ease, box-shadow 0.25s ease;
+      height: 100%;
+      background: #fff;
     }
 
     .card:hover {
@@ -41,80 +39,112 @@
       box-shadow: 0 12px 24px rgba(0,0,0,0.2);
     }
 
-    .card i {
-      font-size: 48px;
-      margin-bottom: 15px;
+    .card-body {
+      text-align: center;
+      padding: 2rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 250px;
+    }
+
+    .card-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
       color: #ff6600;
     }
 
-    .card h3 {
-      margin-bottom: 18px;
+    .card-title {
       font-size: 1.3rem;
+      font-weight: 600;
       color: #222;
+      margin-bottom: 1.5rem;
     }
 
-    .card a {
-      display: inline-block;
-      padding: 12px 20px;
+    .btn-custom {
       background: linear-gradient(135deg, #ff6600, #ff8533);
-      color: #fff;
+      border: none;
       border-radius: 10px;
-      text-decoration: none;
+      color: #fff;
       font-weight: bold;
+      padding: 12px 24px;
       font-size: 0.95rem;
-      transition: background 0.3s, transform 0.2s;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-block;
     }
 
-    .card a:hover {
+    .btn-custom:hover {
       background: linear-gradient(135deg, #e65c00, #ff751a);
       transform: scale(1.05);
+      color: #fff;
+      text-decoration: none;
     }
 
-    /* Responsive tweaks */
-    @media (max-width: 768px) {
-      .card-container {
-        flex-direction: column;
-        align-items: center;
-      }
-      .card {
-        width: 100%;
-        max-width: 400px;
-      }
+    .btn-custom:focus {
+      box-shadow: 0 0 0 0.2rem rgba(255, 102, 0, 0.25);
     }
 
-    @media (max-width: 480px) {
-      .card {
-        padding: 20px 15px;
+    /* Custom responsive adjustments */
+    @media (max-width: 576px) {
+      .card-body {
+        padding: 1.5rem 1rem;
+        min-height: 220px;
       }
-      .card i {
-        font-size: 40px;
+      
+      .card-icon {
+        font-size: 2.5rem;
       }
-      .card h3 {
+      
+      .card-title {
         font-size: 1.1rem;
       }
-      .card a {
+      
+      .btn-custom {
         font-size: 0.9rem;
-        padding: 10px 16px;
+        padding: 10px 20px;
       }
     }
   </style>
 </head>
 <body>
-  <div class="card-container">
-    <div class="card">
-      <i class="fas fa-video"></i>
-      <h3>Prototype Video</h3>
-      <a href="https://drive.google.com/file/d/1_IGE4onA8p3SmI1jufkLhK26H0HvtX7v/view?usp=sharing" target="_blank">
-        Watch Now
-      </a>
-    </div>
-    <div class="card">
-      <i class="fab fa-github"></i>
-      <h3>GitHub Repository</h3>
-      <a href="https://github.com/gagradebnath/SolChain" target="_blank">
-        View Repo
-      </a>
+  <div class="main-container">
+    <div class="container">
+      <div class="row justify-content-center g-4">
+        <div class="col-12 col-md-6 col-lg-4">
+          <div class="card h-100">
+            <div class="card-body">
+              <i class="fas fa-video card-icon"></i>
+              <h3 class="card-title">Prototype Video</h3>
+              <a href="https://drive.google.com/file/d/1_IGE4onA8p3SmI1jufkLhK26H0HvtX7v/view?usp=sharing" 
+                 target="_blank" 
+                 rel="noopener" 
+                 class="btn btn-custom">
+                Watch Now
+              </a>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-12 col-md-6 col-lg-4">
+          <div class="card h-100">
+            <div class="card-body">
+              <i class="fab fa-github card-icon"></i>
+              <h3 class="card-title">GitHub Repository</h3>
+              <a href="https://github.com/gagradebnath/SolChain" 
+                 target="_blank" 
+                 rel="noopener" 
+                 class="btn btn-custom">
+                View Repo
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
