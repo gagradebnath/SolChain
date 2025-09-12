@@ -28,6 +28,7 @@
     "@openzeppelin/contracts-upgradeable": "^5.0.2",
     "dotenv": "^16.4.5",
     "ethers": "^6.11.1",
+    "kubo-rpc-client": "^5.2.0",
     "web3": "^4.5.0"
   },
   "devDependencies": {

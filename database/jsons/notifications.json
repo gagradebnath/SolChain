@@ -97,6 +97,14 @@
         "type": "trade",
         "timestamp": "2025-08-28T17:47:56.379Z",
         "isRead": false
+      },
+      {
+        "id": "1756667284808_s",
+        "title": "Energy Sold",
+        "message": "undefined purchased 21 kWh from you at $0.25/kWh.",
+        "type": "transaction",
+        "timestamp": "2025-08-31T19:08:04.808Z",
+        "isRead": false
       }
     ]
   },
@@ -125,6 +133,22 @@
         "message": "undefined purchased 1.2 kWh from you at $0.24/kWh.",
         "type": "transaction",
         "timestamp": "2025-08-28T17:24:18.700Z",
+        "isRead": false
+      },
+      {
+        "id": "1756667284808_b",
+        "title": "Purchase Successful",
+        "message": "You purchased 21 kWh from JohnDoe at $0.25/kWh.",
+        "type": "transaction",
+        "timestamp": "2025-08-31T19:08:04.808Z",
+        "isRead": false
+      },
+      {
+        "id": "1756667330914",
+        "title": "Energy Listed for Sale",
+        "message": "You listed 2 kWh at $0.2/kWh on the market.",
+        "type": "trade",
+        "timestamp": "2025-08-31T19:08:50.914Z",
         "isRead": false
       }
     ]

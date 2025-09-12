@@ -542,4 +542,106 @@ describe("EnergyTrading", function () {
             ).to.be.revertedWithCustomError(energyTrading, "UserIsBlacklisted");
         });
     });
+
+    describe("State Channels", function () {
+        it("Should open a state channel", async function () {
+            const { energyTrading, seller, buyer } = await loadFixture(deployEnergyTradingFixture);
+            
+            const participants = [seller.address, buyer.address];
+            const shardId = 1;
+            
+            await expect(
+                energyTrading.createShard("Microgrid-1", [])
+            ).to.emit(energyTrading, "ShardCreated");
+            
+            await expect(
+                energyTrading.openStateChannel(participants, shardId)
+            ).to.emit(energyTrading, "StateChannelOpened");
+            
+            const channel = await energyTrading.stateChannels(1);
+            expect(channel.participants.length).to.equal(2);
+            expect(channel.isOpen).to.equal(true);
+        });
+
+        it("Should close a state channel with batch settlement", async function () {
+            const { energyTrading, seller, buyer } = await loadFixture(deployEnergyTradingFixture);
+            
+            const participants = [seller.address, buyer.address];
+            const shardId = 1;
+            
+            await energyTrading.createShard("Microgrid-1", []);
+            await energyTrading.openStateChannel(participants, shardId);
+            
+            const batchHash = ethers.keccak256(ethers.toUtf8Bytes("test batch"));
+            const ipfsHash = "QmTest";
+            
+            await expect(
+                energyTrading.closeStateChannel(1, batchHash, ipfsHash)
+            ).to.emit(energyTrading, "StateChannelClosed");
+            
+            const channel = await energyTrading.stateChannels(1);
+            expect(channel.isOpen).to.equal(false);
+            expect(channel.batchSettlementHash).to.equal(batchHash);
+            expect(await energyTrading.ipfsHashes(batchHash)).to.equal(ipfsHash);
+        });
+
+        it("Should reject opening channel with less than 2 participants", async function () {
+            const { energyTrading, seller } = await loadFixture(deployEnergyTradingFixture);
+            
+            const participants = [seller.address];
+            const shardId = 1;
+            
+            await energyTrading.createShard("Microgrid-1", []);
+            
+            await expect(
+                energyTrading.openStateChannel(participants, shardId)
+            ).to.be.revertedWith("At least 2 participants");
+        });
+    });
+
+    describe("Sharding", function () {
+        it("Should create a shard", async function () {
+            const { energyTrading } = await loadFixture(deployEnergyTradingFixture);
+            
+            const location = "Microgrid-1";
+            const validators = [];
+            
+            await expect(
+                energyTrading.createShard(location, validators)
+            ).to.emit(energyTrading, "ShardCreated");
+            
+            const shard = await energyTrading.shards(1);
+            expect(shard.location).to.equal(location);
+        });
+
+        it("Should update shard validators", async function () {
+            const { energyTrading, seller } = await loadFixture(deployEnergyTradingFixture);
+            
+            await energyTrading.createShard("Microgrid-1", []);
+            
+            const newValidators = [seller.address];
+            
+            await expect(
+                energyTrading.updateShardValidators(1, newValidators)
+            ).to.emit(energyTrading, "ValidatorSetUpdated");
+            
+            const validators = await energyTrading.shardValidators(1, 0);
+            expect(validators.validator).to.equal(seller.address);
+        });
+    });
+
+    describe("Cross-Shard Reconciliation", function () {
+        it("Should perform cross-shard reconciliation", async function () {
+            const { energyTrading } = await loadFixture(deployEnergyTradingFixture);
+            
+            await energyTrading.createShard("Microgrid-1", []);
+            await energyTrading.createShard("Microgrid-2", []);
+            
+            const batchHash = ethers.keccak256(ethers.toUtf8Bytes("cross-shard batch"));
+            
+            await expect(
+                energyTrading.crossShardReconcile(1, 2, batchHash)
+            ).to.emit(energyTrading, "CrossShardReconciliation");
+        });
+    });
 });

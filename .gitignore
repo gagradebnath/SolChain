@@ -3,7 +3,7 @@ node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-
+deployments/
 # Build outputs
 dist/
 build/
@@ -62,3 +62,7 @@ temp/
 docs/_build/
 .github/instructions/blockchain.instructions.md
 .github/instructions/blockchainFE.instructions.md
+blockchain/deployments/
+WhitePaper/GreyDevs_Demo Video 1.mp4
+WhitePaper/Untitled design.mp4
+WhitePaper/f-enhanced-v2.wav

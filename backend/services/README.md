@@ -8,10 +8,7 @@ This directory contains the core business logic services for the SolChain platfo
 services/
 ├── README.md                  # This documentation file
 ├── blockchainService.js       # Primary blockchain integration service
-├── authService.js            # Authentication and authorization (future)
-├── iotService.js             # IoT device integration (future)
-├── notificationService.js    # User notifications (future)
-└── analyticsService.js       # Data analytics and reporting (future)
+
 ```
 
 ## 🔗 Core Services

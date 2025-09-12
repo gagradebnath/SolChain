@@ -22,7 +22,163 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
  * 
  * @author Team GreyDevs
  */
+/**
+ * @dev Enhanced EnergyTrading contract with:
+ * - Off-chain state channels (open/close, multi-trade)
+ * - Batch settlement (store only batch hashes)
+ * - Sharded microgrid support
+ * - PBFT/DPoS validator hooks
+ * - IPFS hash storage for off-chain data
+ */
 contract EnergyTrading is AccessControl, ReentrancyGuard, Pausable {
+    // State Channel Structs
+    struct StateChannel {
+        uint256 id;
+        address[] participants;
+        uint256 shardId;
+        bytes32 latestStateHash; // Off-chain state hash
+        bool isOpen;
+        uint256 openedAt;
+        uint256 closedAt;
+        bytes32 batchSettlementHash; // Hash of batch settlement
+    }
+
+    // Sharding
+    struct Shard {
+        uint256 id;
+        string location;
+        address[] localValidators;
+        uint256 tps;
+        uint256 lastBatchTime;
+    }
+
+    // PBFT/DPoS validator set (for hooks)
+    struct Validator {
+        address validator;
+        uint256 stake;
+        bool isActive;
+    }
+
+    // IPFS hash mapping for off-chain trade details
+    mapping(bytes32 => string) public ipfsHashes; // batchHash => ipfsHash
+
+    // State channel and sharding state
+    uint256 public nextChannelId = 1;
+    uint256 public nextShardId = 1;
+    mapping(uint256 => StateChannel) public stateChannels;
+    mapping(uint256 => Shard) public shards;
+    mapping(address => uint256[]) public userChannels;
+    mapping(uint256 => Validator[]) public shardValidators;
+
+    // Logging/monitoring
+    event StateChannelOpened(uint256 indexed channelId, address[] participants, uint256 shardId);
+    event StateChannelClosed(uint256 indexed channelId, bytes32 batchSettlementHash, string ipfsHash);
+    event BatchSettled(uint256 indexed channelId, bytes32 batchHash, string ipfsHash);
+    event ShardCreated(uint256 indexed shardId, string location);
+    event CrossShardReconciliation(uint256 fromShard, uint256 toShard, bytes32 batchHash);
+    event ValidatorSetUpdated(uint256 indexed shardId, address[] validators);
+
+    /**
+     * @dev Open a new state channel for off-chain high-frequency trading
+     */
+    function openStateChannel(address[] calldata participants, uint256 shardId) external whenNotPaused returns (uint256) {
+        require(participants.length >= 2, "At least 2 participants");
+        require(shards[shardId].id != 0, "Invalid shard");
+        uint256 channelId = nextChannelId++;
+        stateChannels[channelId] = StateChannel({
+            id: channelId,
+            participants: participants,
+            shardId: shardId,
+            latestStateHash: bytes32(0),
+            isOpen: true,
+            openedAt: block.timestamp,
+            closedAt: 0,
+            batchSettlementHash: bytes32(0)
+        });
+        for (uint i = 0; i < participants.length; i++) {
+            userChannels[participants[i]].push(channelId);
+        }
+        emit StateChannelOpened(channelId, participants, shardId);
+        return channelId;
+    }
+
+    /**
+     * @dev Close a state channel and submit batch settlement hash (off-chain aggregation)
+     * @param channelId The channel to close
+     * @param batchHash Hash of the batch settlement (off-chain computed)
+     * @param ipfsHash IPFS hash of the batch details
+     */
+    function closeStateChannel(uint256 channelId, bytes32 batchHash, string calldata ipfsHash) external whenNotPaused {
+        StateChannel storage channel = stateChannels[channelId];
+        require(channel.isOpen, "Channel not open");
+        require(batchHash != bytes32(0), "Invalid batch hash");
+        // Only participant can close, or admin for demo
+        bool isParticipant = false;
+        for (uint i = 0; i < channel.participants.length; i++) {
+            if (msg.sender == channel.participants[i]) {
+                isParticipant = true;
+                break;
+            }
+        }
+        require(isParticipant || hasRole(ADMIN_ROLE, msg.sender), "Not a channel participant or admin");
+        channel.isOpen = false;
+        channel.closedAt = block.timestamp;
+        channel.batchSettlementHash = batchHash;
+        channel.latestStateHash = batchHash;
+        ipfsHashes[batchHash] = ipfsHash;
+        emit StateChannelClosed(channelId, batchHash, ipfsHash);
+        emit BatchSettled(channelId, batchHash, ipfsHash);
+    }
+
+    /**
+     * @dev Create a new microgrid shard
+     */
+    function createShard(string calldata location, address[] calldata validators) external onlyRole(ADMIN_ROLE) returns (uint256) {
+        uint256 shardId = nextShardId++;
+        shards[shardId] = Shard({
+            id: shardId,
+            location: location,
+            localValidators: validators,
+            tps: 0,
+            lastBatchTime: block.timestamp
+        });
+        for (uint i = 0; i < validators.length; i++) {
+            shardValidators[shardId].push(Validator({validator: validators[i], stake: 0, isActive: true}));
+        }
+        emit ShardCreated(shardId, location);
+        emit ValidatorSetUpdated(shardId, validators);
+        return shardId;
+    }
+
+    /**
+     * @dev Cross-shard reconciliation (store hash of cross-shard batch)
+     */
+    function crossShardReconcile(uint256 fromShard, uint256 toShard, bytes32 batchHash) external onlyRole(ADMIN_ROLE) {
+        require(shards[fromShard].id != 0 && shards[toShard].id != 0, "Invalid shard");
+        emit CrossShardReconciliation(fromShard, toShard, batchHash);
+    }
+
+    /**
+     * @dev PBFT/DPoS validator update hook (for off-chain consensus)
+     */
+    function updateShardValidators(uint256 shardId, address[] calldata validators) external onlyRole(ADMIN_ROLE) {
+        require(shards[shardId].id != 0, "Invalid shard");
+        delete shardValidators[shardId];
+        for (uint i = 0; i < validators.length; i++) {
+            shardValidators[shardId].push(Validator({validator: validators[i], stake: 0, isActive: true}));
+        }
+        shards[shardId].localValidators = validators;
+        emit ValidatorSetUpdated(shardId, validators);
+    }
+
+    /**
+     * @dev Store IPFS hash for a batch (can be called by off-chain orchestrator)
+     */
+    function storeIPFSHash(bytes32 batchHash, string calldata ipfsHash) external onlyRole(ADMIN_ROLE) {
+        ipfsHashes[batchHash] = ipfsHash;
+    }
+
+    // --- End of enhancements ---
     using SafeERC20 for IERC20;
 
     // Roles
